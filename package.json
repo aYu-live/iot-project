@@ -1,0 +1,13 @@
+{
+    "name": "iot-project",
+    "private": true,
+    "version": "0.0.0",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc && vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

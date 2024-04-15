@@ -1,0 +1,59 @@
+version: '3.6'
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    # links:
+    #   - server
+    # 前端构建完成后不会启动容器
+
+  mysql:
+    image: mysql
+    platform: linux/arm64/v8
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/logs:/logs
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    command:
+      --lower_case_table_names=1
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: "11223344aa"
+      MYSQL_DATABASE: "iot-project"
+      # MYSQL_INITDB_SKIP_TZINFO: "Asia/Shanghai"
+
+    restart: always
+  #   network_mode: "bridge"
+
+  server:
+    container_name: nestjs-backend
+    build:
+      context: ./server/
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    volumes:
+      - client-build:/app/public  # 前端构建产物挂载到后端的静态文件目录
+    command: npm run start:prod
+    depends_on:
+      - client
+      - mysql
+    environment:
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=11223344aa
+      - DATABASE_NAME=iot-project
+  
+
+volumes:
+  client-build:
+    name: client-build-temp
+  mysql-data:
+    driver: local
