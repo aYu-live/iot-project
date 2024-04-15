@@ -3,9 +3,9 @@
     "private": true,
     "version": "0.0.0",
     "scripts": {
-        "dev": "vite",
-        "build": "vue-tsc && vite build",
-        "preview": "vite preview"
+        "init": "pnpm i && cd server && pnpm i && cd ../client && pnpm i",
+        "dev": "concurrently -r -c magenta,blue -n client,server \"npm run dev\" \"npm run start:dev\""
+
     },
     "devDependencies": {
         "concurrently": "^8.2.2"
