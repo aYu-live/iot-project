@@ -8,7 +8,7 @@ export class FloorController {
 
   @Get('list')
   async getFloorList(@Query() query?: Floor) {
-    const [list, total] = await this.floorService.getFloor(query);
+    const [list, total] = await this.floorService.getFloorList(query);
     return { code: 200, data: { list, total } };
   }
   @Post('create')

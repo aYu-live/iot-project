@@ -16,11 +16,8 @@ export class Floor {
   @Column()
   ip: string;
 
-  @OneToMany(() => Device, (device) => device.id)
-  deviceId: number[];
-
-  @Column()
-  remark: string;
+  @OneToMany(() => Device, (device) => device.floor)
+  deviceId: Device[];
 
   @CreateDateColumn()
   createAt: Date;

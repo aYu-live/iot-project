@@ -10,21 +10,26 @@ export class FloorService {
     private floorRepository: Repository<Floor>,
   ) {}
 
-  getFloor(params: Floor) {
+  getFloorList(params?: Floor) {
     const where = {
-      level: params.level,
-      ip: params.ip,
+      level: params?.level,
+      ip: params?.ip,
       isDelete: Not(true),
     };
-    if (!params.ip) delete where.ip;
+    if (where.hasOwnProperty('ip') && !where.ip) delete where.ip;
     return this.floorRepository.findAndCount({
+      relations: ['deviceId'],
       where,
       order: {
         level: 'ASC',
       },
     });
   }
-  async createFloor(list: Floor[]) {
+
+  getFloor(level: number) {
+    return this.floorRepository.findOneBy({ level });
+  }
+  createFloor(list: Floor[]) {
     return this.floorRepository.save(list);
   }
   deleteFloor(floor: Floor) {

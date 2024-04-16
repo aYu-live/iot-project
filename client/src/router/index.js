@@ -7,9 +7,9 @@ const routes = [{
     redirect: '/floor',
 },
 {
-    path: '/',
+    path: '/floor',
     meta: { label: '楼层' },
-    redirect: '/floor',
+    redirect: '/floor/manage',
 },
 {
     path: '/floor/manage',

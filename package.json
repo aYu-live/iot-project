@@ -4,7 +4,9 @@
     "version": "0.0.0",
     "scripts": {
         "init": "pnpm i && cd server && pnpm i && cd ../client && pnpm i",
-        "dev": "concurrently -r -c magenta,blue -n client,server \"npm run dev\" \"npm run start:dev\""
+        "static": "cd client && npm run static",
+        "develop": "cd server && npm run start:dev",
+        "dev": "concurrently -r -c magenta,blue -n client,server \"npm run static\" \"npm run develop\""
 
     },
     "devDependencies": {

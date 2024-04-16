@@ -27,7 +27,10 @@
             :pagination="pagination"
         >
             <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'operator'">
+                <template v-if="column.key === 'deviceId'">
+                    {{ record.deviceId.map(item => item.id).join('、') }}
+                </template>
+                <template v-else-if="column.key === 'operator'">
                     <span>
                         <a @click="() => handleDelete(record)">删除</a>
                     </span>
@@ -40,14 +43,19 @@
 <script setup>
 import { message, Modal } from 'ant-design-vue';
 import { reactive, ref, onMounted } from 'vue';
-import { getFloorList, createFloorList, deleteFloor } from '@api'
+import { getFloorList, createFloorList, deleteFloor, createDeviceList } from '@api'
 import * as XLSX from 'xlsx';
 
 const PARAMS_MAP = {
     楼层: 'level',
-    网关: 'ip',
-    备注: 'remark'
-}
+    所属网关IP: 'ip',
+    备注: 'remark',
+    设备编号: 'deviceId',
+    所在房间: 'room',
+    网关DADR: 'DADR',
+    本机地址: 'localAddress'
+};
+
 const columns = [
     {
         title: '楼层',
@@ -60,9 +68,9 @@ const columns = [
         key: 'ip',
     },
     {
-        title: '备注',
-        dataIndex: 'remark',
-        key: 'remark',
+        title: '设备',
+        dataIndex: 'deviceId',
+        key: 'deviceId',
     },
     {
         title: '操作',
@@ -84,7 +92,6 @@ onMounted(() => {
     getTableList()
 })
 const handleSubmit = async () => {
-    console.log(formModel.valu)
     getTableList(formModel.value)
 }
 
@@ -102,24 +109,51 @@ const dummyRequest = ({ file, onSuccess }) => {
 const handleBeforeUpload = (file) => {
     loading.value = true
     const reader = new FileReader();
-    let list = []
+    let floorList = []
+    let deviceList = []
     reader.onload = (e) => {
         const data = e.target.result;
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
-        list = json.map(item => {
-            const param = {};
-            Object.keys(item).forEach(key => {
-                param[PARAMS_MAP[key]] = item[key]
-            })
-            return param
-        })
+        floorList = json?.filter?.((() => {
+            const seen = new Set();
+            return function(item) {
+                const level = item?.楼层;
+                if (level && !seen.has(level)) {
+                    seen.add(level);
+                return true;
+                }
+                return false;
+            };
+        })())?.map(item => {
+            const level = item.楼层
+            const deviceId = json.reduce((pre, cur) => {
+                if (cur.楼层 === level) {
+                    return [...pre, cur.设备编号]
+                }
+                return pre
+            }, [])
+            return {
+                level,
+                ip: item.所属网关IP,
+                deviceId
+            }
+        });
+        deviceList = json.map(item => ({
+            id: item.设备编号,
+            room: item.所在房间,
+            DADR: item.网关DADR,
+            localAddress: item.本机地址,
+            floorLevel: item.楼层,
+            remark: item.备注,
+        }))
     };
     reader.onloadend = async () => {
         try {
-            await createFloorList(list)
+            await createFloorList(floorList)
+            await createDeviceList(deviceList)
             getTableList(formModel.value)
             message.success('上传成功')
         } finally {
