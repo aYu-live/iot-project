@@ -13,8 +13,7 @@ services:
     # 前端构建完成后不会启动容器
 
   mysql:
-    image: mysql
-    platform: linux/arm64/v8
+    image: mysql:8
     volumes:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/conf:/etc/mysql/conf.d
