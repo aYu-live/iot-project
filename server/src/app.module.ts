@@ -7,14 +7,12 @@ import { join } from 'path';
 import { DeviceModule } from './device/device.module';
 import { FloorModule } from './floor/floor.module';
 
-const IS_PROD = process.env.NODE_ENV === 'production';
-
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'mysql',
-        host: IS_PROD ? 'mysql' : '127.0.0.1',
+        host: 'mysql',
         port: 3306,
         username: 'root',
         password: '11223344aa',
