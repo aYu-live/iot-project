@@ -11,6 +11,13 @@ export class FloorController {
     const [list, total] = await this.floorService.getFloorList(query);
     return { code: 200, data: { list, total } };
   }
+
+  @Get('ip/list')
+  async getIpList(@Query() query?: Floor) {
+    const data = await this.floorService.getIpList(query);
+    return { code: 200, data };
+  }
+
   @Post('create')
   async updateFloorList(@Body() body: Floor[]) {
     const data = await this.floorService.createFloor(body);

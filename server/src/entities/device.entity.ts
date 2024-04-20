@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -10,12 +11,19 @@ import {
 import { Floor } from './floor.entity';
 
 @Entity('device')
+@Index(['deviceId', 'ip'], { unique: true })
 export class Device {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   room: string;
+
+  @Column()
+  ip: string;
+
+  @Column()
+  deviceId: string;
 
   @Column()
   DADR: string;
@@ -26,7 +34,7 @@ export class Device {
   @Column({ nullable: true })
   remark: string;
 
-  @Column() // 这个列用来存储关联的用户ID
+  @Column() // 这个列用来存储关联的楼层ID
   level: number;
 
   @ManyToOne(() => Floor, (floor) => floor.deviceId)

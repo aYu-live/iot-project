@@ -4,12 +4,14 @@
             <template #logo="{ collapsed }">
                 <div class="logo">
                     <img src="./assets/logo.png" alt="logo">
-                    <span v-show="!collapsed">xx系统</span>
+                    <span v-show="!collapsed">Ecosync系统</span>
                 </div>
             </template>
             <template #header="{ collapsed }">
                 <div class="header">
-                    <a-avatar icon="user" :src="niuniu" />
+                    <a-avatar>
+                        <template #icon><UserOutlined /></template>
+                    </a-avatar>
                     <a-dropdown v-if="!collapsed">
                         <span class="nick">管理员
                             <CaretDownOutlined />
@@ -50,16 +52,14 @@
 <script>
 import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { CaretDownOutlined, EnvironmentOutlined } from '@ant-design/icons-vue'
+import { CaretDownOutlined, EnvironmentOutlined, UserOutlined } from '@ant-design/icons-vue'
 import axios from './plugins/tool-axios'
 import Layout from '@/components/Layout.vue'
 import { useMenuList } from '@/hooks/menuList'
-import niuniu from '@/assets/niuniu.png'
 
 export default {
     name: 'App',
-
-    components: { Layout, CaretDownOutlined, EnvironmentOutlined },
+    components: { Layout, CaretDownOutlined, EnvironmentOutlined, UserOutlined },
 
     setup () {
         // 根据券商生成菜单
@@ -73,7 +73,6 @@ export default {
             route,
             breadcrumbList,
             loading: axios.loading,
-            niuniu,
             isRouterAlive,
         }
     }
@@ -108,10 +107,13 @@ function useInit () {
         color: #fff;
         white-space: nowrap;
         height: 48px;
-        padding: 0 24px;
+        padding: 8px 24px;
         background: rgba(255, 255, 255, 0.2);
 
         img {
+            background-color: cornsilk;
+            border-radius: 10px;
+            height: 100%;
             margin-right: 15px;
         }
     }
@@ -167,6 +169,14 @@ function useInit () {
         background: #1890ff;
         &::after {
             transition: all 0.1s;
+        }
+    }
+}
+
+.ant-menu {
+    .ant-menu-item.ant-menu-item-only-child {
+        &:last-child {
+            margin-bottom: 100px;
         }
     }
 }

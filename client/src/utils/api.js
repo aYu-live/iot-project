@@ -1,6 +1,8 @@
 import axios from '@/plugins/tool-axios'
 const $http = axios.$http
 
+export const getIpList = async (data) => $http.get('/api/floor/ip/list', data)
+
 export const getFloorList = async (data) => $http.get('/api/floor/list', data)
 export const createFloorList = async (data) => $http.post('/api/floor/create', data)
 export const deleteFloor = async (data) => $http.post('/api/floor/delete', data)

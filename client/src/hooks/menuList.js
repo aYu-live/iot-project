@@ -21,12 +21,12 @@ function useMenuList () {
                 type: 'sub',
                 icon: defineAsyncComponent(() => import('@ant-design/icons-vue/HomeOutlined')),
                 children: [
-                    ...floorChildren,
                     {
                         route: '/floor/manage',
                         label: '楼层管理',
                         component: () => import('../views/floor/manage.vue')
-                    }
+                    },
+                    ...floorChildren,
                 ]
             }
         ]

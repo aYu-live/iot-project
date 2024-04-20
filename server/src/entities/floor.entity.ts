@@ -13,8 +13,8 @@ export class Floor {
   @PrimaryColumn()
   level: number;
 
-  @Column()
-  ip: string;
+  @Column('text', { array: true })
+  ip: string[];
 
   @OneToMany(() => Device, (device) => device.floor)
   deviceId: Device[];

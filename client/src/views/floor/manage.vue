@@ -5,7 +5,14 @@
             style="max-width: 600px"
         >
             <a-form-item label="网关IP">
-                <a-input v-model:value="formModel.ip" />
+                <a-select
+                    :options="ipList"
+                    v-model:value="formModel.ip"
+                    mode="multiple"
+                    allow-clear
+                    showSearch
+                    placeholder="请选择IP"
+                />
             </a-form-item>
             <a-form-item>
                 <a-button type="primary" @click="handleSubmit">查询</a-button>
@@ -30,6 +37,9 @@
                 <template v-if="column.key === 'deviceId'">
                     {{ record.deviceId.map(item => item.id).join('、') }}
                 </template>
+                <template v-else-if="column.key === 'ip'">
+                    {{ record.ip.join('、') }}
+                </template>
                 <template v-else-if="column.key === 'operator'">
                     <span>
                         <a @click="() => handleDelete(record)">删除</a>
@@ -43,29 +53,21 @@
 <script setup>
 import { message, Modal } from 'ant-design-vue';
 import { reactive, ref, onMounted } from 'vue';
-import { getFloorList, createFloorList, deleteFloor, createDeviceList } from '@api'
+import { getFloorList, createFloorList, deleteFloor, createDeviceList, getIpList } from '@api'
 import * as XLSX from 'xlsx';
-
-const PARAMS_MAP = {
-    楼层: 'level',
-    所属网关IP: 'ip',
-    备注: 'remark',
-    设备编号: 'deviceId',
-    所在房间: 'room',
-    网关DADR: 'DADR',
-    本机地址: 'localAddress'
-};
 
 const columns = [
     {
         title: '楼层',
         dataIndex: 'level',
         key: 'level',
+        width: 80
     },
     {
         title: '网关',
         dataIndex: 'ip',
         key: 'ip',
+        width: 300
     },
     {
         title: '设备',
@@ -76,23 +78,31 @@ const columns = [
         title: '操作',
         dataIndex: 'operator',
         key: 'operator',
+        width: 100
     },
     
 ]
 
 const labelCol = { style: { width: '50px' } };
 const formModel = ref({
-    ip: ''
+    ip: []
 })
 const loading = ref(false)
 const dataSource = ref([]);
+const ipList = ref([])
 const pagination = reactive({ total: 0, disabled: true,  pageSize: 999 })
 
 onMounted(() => {
     getTableList()
+    getIps()
 })
 const handleSubmit = async () => {
     getTableList(formModel.value)
+}
+
+const getIps = async () => {
+    const ips = await getIpList()
+    ipList.value = ips.map(item => ({ label: item, value: item }))
 }
 
 const getTableList = async (params) => {
@@ -106,6 +116,24 @@ const dummyRequest = ({ file, onSuccess }) => {
     onSuccess("ok");
     }, 0);
 }
+
+const transFloorList = (data) => {
+    try {
+    const result = data.reduce((acc, { 所属网关IP: ip, 楼层: level }) => {
+        const found = acc.find(e => e.level === level);
+        if(!found){
+            acc.push({level, ip:[ip]});
+        }else{
+            !found.ip.includes(ip) && found.ip.push(ip);
+        }
+        return acc;
+    }, []);
+    return result
+} catch (error) {
+    return []
+}
+}
+
 const handleBeforeUpload = (file) => {
     loading.value = true
     const reader = new FileReader();
@@ -117,37 +145,23 @@ const handleBeforeUpload = (file) => {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
-        floorList = json?.filter?.((() => {
-            const seen = new Set();
-            return function(item) {
-                const level = item?.楼层;
-                if (level && !seen.has(level)) {
-                    seen.add(level);
-                return true;
-                }
-                return false;
-            };
-        })())?.map(item => {
-            const level = item.楼层
-            const deviceId = json.reduce((pre, cur) => {
-                if (cur.楼层 === level) {
-                    return [...pre, cur.设备编号]
-                }
-                return pre
-            }, [])
-            return {
-                level,
-                ip: item.所属网关IP,
-                deviceId
-            }
-        });
-        deviceList = json.map(item => ({
-            id: item.设备编号,
-            room: item.所在房间,
-            DADR: item.网关DADR,
-            localAddress: item.本机地址,
-            floorLevel: item.楼层,
-            remark: item.备注,
+        floorList = transFloorList(json);
+        deviceList = json.map(({
+            设备编号: deviceId,
+            所在房间: room,
+            所属网关IP: ip,
+            网关DADR: DADR,
+            本机地址: localAddress,
+            楼层: level,
+            备注: remark
+        }) => ({
+            deviceId,
+            room,
+            DADR,
+            ip,
+            localAddress,
+            level,
+            remark,
         }))
     };
     reader.onloadend = async () => {
@@ -168,6 +182,7 @@ const handleBeforeUpload = (file) => {
     // 阻止默认上传行为
     return false;
 }
+
 
 const handleDelete = (item) => {
     Modal.confirm({

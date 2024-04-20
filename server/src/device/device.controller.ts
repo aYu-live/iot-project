@@ -11,25 +11,36 @@ export class DeviceController {
   ) {}
 
   @Get('list')
-  async getDeviceList(@Query() query?: Device) {
-    const data = this.deviceService.getDeviceList(query);
-    return { code: 200, data };
+  async getDeviceList(@Query() query) {
+    const [list, total] = await this.deviceService.getDeviceList(query);
+    return { code: 200, data: { list, total }};
   }
 
   @Post('create')
   async updateFloorList(@Body() body: Device[]) {
-    const [floorList] = await this.floorService.getFloorList();
-    console.log(floorList)
+    const list = [];
+    for (const data of body) {
+      const found = await this.deviceService.getDevice({
+        ip: data.ip,
+        deviceId: data.deviceId,
+        isDelete: false,
+      });
 
-    const list = body.map((item) => {
-      return {
-        ...item,
-        floor: floorList.find((floor) => floor.level === item.level),
-      };
-    });
-    console.log(list)
-    const data = await this.deviceService.createDevice(list);
-    return { code: 200, data };
+      if (found) {
+        // 如果找到IP和deviceId匹配的现存记录, 更新它
+        await this.deviceService.upsertDevice([{ ...found, ...data }]);
+      } else {
+        // 否则创建新记录，并可能需要关联 floor 实体
+        const floor = await this.floorService.getFloor({
+          level: data.level,
+        });
+        if (floor) {
+          data.floor = floor;
+        }
+        list.push(await this.deviceService.upsertDevice([data]));
+      }
+    }
+    return { code: 200, data: list };
   }
 
   @Post('delete')

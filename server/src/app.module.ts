@@ -7,23 +7,21 @@ import { join } from 'path';
 import { DeviceModule } from './device/device.module';
 import { FloorModule } from './floor/floor.module';
 
+const IS_PROD = process.env.NODE_ENV === 'production';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
-        type: 'mysql',
-        host: 'mysql',
-        port: 3306,
+        type: 'postgres',
+        host: IS_PROD ? 'postgres' : '127.0.0.1',
+        port: 5432,
         username: 'root',
-        password: '11223344aa',
+        password: IS_PROD ? '11223344aa' : 'root',
         database: 'iot-project',
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: true, // 自动链接被 forFeature 注册的实体
         synchronize: true, // 实体与表同步 调试模式下开始。不然会有强替换导致数据丢是
-        extra: {
-          charset: 'utf8mb4_unicode_ci',
-        },
-        timezone: '+08:00', // 东八区
+        timezone: 'UTC', // 东八区
         cache: {
           duration: 60000, // 1分钟的缓存
         },
