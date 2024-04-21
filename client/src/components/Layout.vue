@@ -2,11 +2,8 @@
     <a-layout :class="$style.layout">
         <a-layout-sider width="200" collapsible v-model:collapsed="collapsed">
             <slot name="logo" :collapsed="collapsed"></slot>
-            <a-layout-header class="header-wrapper">
-                <slot name="header" :collapsed="collapsed"></slot>
-            </a-layout-header>
             <a-menu theme="dark" mode="inline" @click="onClickMenu" :selectedKeys="selectedKeys"
-                    :openKeys="selectedKeys">
+                    :openKeys="selectedKeys" style="margin-top: 10px;">
                 <template v-for="menu in menuList">
                     <template v-if="menu.type === 'sub'">
                         <a-sub-menu v-if="menu.type === 'sub'" :key="menu.route">

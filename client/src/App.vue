@@ -7,25 +7,6 @@
                     <span v-show="!collapsed">Ecosync系统</span>
                 </div>
             </template>
-            <template #header="{ collapsed }">
-                <div class="header">
-                    <a-avatar>
-                        <template #icon><UserOutlined /></template>
-                    </a-avatar>
-                    <a-dropdown v-if="!collapsed">
-                        <span class="nick">管理员
-                            <CaretDownOutlined />
-                        </span>
-                        <template #overlay>
-                            <a-menu>
-                                <a-menu-item>
-                                    <a href="/login/logout">退出系统</a>
-                                </a-menu-item>
-                            </a-menu>
-                        </template>
-                    </a-dropdown>
-                </div>
-            </template>
             <template #navigation>
                 <div class="breadcrumb">
                     <environment-outlined class="location-icon"/>
@@ -118,26 +99,6 @@ function useInit () {
         }
     }
 
-    .header {
-        padding: 0 24px;
-        color: rgba(255, 255, 255, 0.65);
-
-        .nick {
-            cursor: pointer;
-            margin-left: 15px;
-
-            .anticon {
-                transform: translateY(2px);
-                margin-left: 8px;
-            }
-
-            &:hover {
-                .anticon {
-                    transform: rotate(180deg);
-                }
-            }
-        }
-    }
 
     .location-icon {
         color: rgba(0, 0, 0, 0.45);

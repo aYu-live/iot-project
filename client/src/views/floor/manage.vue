@@ -12,10 +12,18 @@
                     allow-clear
                     showSearch
                     placeholder="请选择IP"
+                    @change="onChange"
                 />
             </a-form-item>
-            <a-form-item>
-                <a-button type="primary" @click="handleSubmit">查询</a-button>
+            <a-form-item label="楼层">
+                <a-select
+                    :options="levelOpts"
+                    v-model:value="formModel.level"
+                    mode="multiple"
+                    allow-clear
+                    placeholder="请选择楼层"
+                    @change="onChange"
+                />
             </a-form-item>
         </a-form>
         <a-upload
@@ -85,19 +93,21 @@ const columns = [
 
 const labelCol = { style: { width: '50px' } };
 const formModel = ref({
-    ip: []
+    ip: [],
+    level: []
 })
 const loading = ref(false)
 const dataSource = ref([]);
 const ipList = ref([])
+const levelOpts = ref([])
 const pagination = reactive({ total: 0, disabled: true,  pageSize: 999 })
 
 onMounted(() => {
-    getTableList()
+    getTableList({first: true})
     getIps()
 })
-const handleSubmit = async () => {
-    getTableList(formModel.value)
+const onChange = async () => {
+    getTableList({params: formModel.value})
 }
 
 const getIps = async () => {
@@ -105,10 +115,13 @@ const getIps = async () => {
     ipList.value = ips.map(item => ({ label: item, value: item }))
 }
 
-const getTableList = async (params) => {
+const getTableList = async ({first, params}) => {
     const { total, list } = await getFloorList(params);
     dataSource.value = list
     pagination.total = total
+    if (first) {
+        levelOpts.value = list.map(item => ({ label: `第${item.level}楼`, value: item.level }))
+    }
 }
 // 这个方法阻止Upload组件自动上传文件
 const dummyRequest = ({ file, onSuccess }) => {
@@ -168,7 +181,7 @@ const handleBeforeUpload = (file) => {
         try {
             await createFloorList(floorList)
             await createDeviceList(deviceList)
-            getTableList(formModel.value)
+            getTableList({params: formModel.value})
             message.success('上传成功')
         } finally {
             loading.value = false
@@ -190,7 +203,7 @@ const handleDelete = (item) => {
         content: '是否删除该楼层信息',
         onOk: async (close) => {
             await deleteFloor(item)
-            getTableList(formModel.value)
+            getTableList({params: formModel.value})
             message.success('删除成功', 1, close)
             
         },

@@ -13,7 +13,7 @@ export class DeviceController {
   @Get('list')
   async getDeviceList(@Query() query) {
     const [list, total] = await this.deviceService.getDeviceList(query);
-    return { code: 200, data: { list, total }};
+    return { code: 200, data: { list, total } };
   }
 
   @Post('create')
@@ -25,7 +25,6 @@ export class DeviceController {
         deviceId: data.deviceId,
         isDelete: false,
       });
-
       if (found) {
         // 如果找到IP和deviceId匹配的现存记录, 更新它
         await this.deviceService.upsertDevice([{ ...found, ...data }]);

@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Floor } from 'src/entities/floor.entity';
 import { Brackets, In, Repository } from 'typeorm';
 
+interface FloorWithLevelArray extends Omit<Floor, 'level'> {
+  level: number | number[];
+}
 @Injectable()
 export class FloorService {
   constructor(
@@ -10,7 +13,7 @@ export class FloorService {
     private floorRepository: Repository<Floor>,
   ) {}
 
-  getFloorList(params?: Floor) {
+  getFloorList(params?: FloorWithLevelArray) {
     const queryBuilder = this.floorRepository
       .createQueryBuilder('floor')
       .leftJoinAndSelect('floor.deviceId', 'device')
@@ -36,7 +39,13 @@ export class FloorService {
       );
     }
     if (params?.level) {
-      queryBuilder.andWhere('floor.level = :level', { level: params.level });
+      if (Array.isArray(params?.level)) {
+        queryBuilder.andWhere('floor.level IN (:...level)', {
+          level: params.level,
+        });
+      } else {
+        queryBuilder.andWhere('floor.level = :level', { level: params.level });
+      }
     }
     queryBuilder.addOrderBy('floor.level', 'ASC');
     return queryBuilder.getManyAndCount();
