@@ -176,7 +176,8 @@ onBeforeUnmount(() => {
 })
 
 const connectSock = () => {
-    socket = io('http://127.0.0.1:3000/deviceIo');  // 连接到WebSocket服务器
+    console.log(import.meta.env.MODE)
+    socket = io(`http://${import.meta.env.MODE === 'production' ? '192.168.2.5': '127.0.0.1'}:3000/deviceIo`);  // 连接到WebSocket服务器
 
     socket.on('connect', () => {
         console.log('Connected to the WebSocket server.');
