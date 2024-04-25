@@ -176,7 +176,7 @@ onBeforeUnmount(() => {
 })
 
 const connectSock = () => {
-    socket = io('http://localhost:3000/deviceIo');  // 连接到WebSocket服务器
+    socket = io('http://127.0.0.1:3000/deviceIo');  // 连接到WebSocket服务器
 
     socket.on('connect', () => {
         console.log('Connected to the WebSocket server.');
