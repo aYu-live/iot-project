@@ -13,48 +13,129 @@
                     @change="onChange"
                 />
             </a-form-item>
-        </a-form>
-    <a-table :dataSource="dataSource" :columns="columns" :pagination="pagination">
-        <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'operator'">
+    </a-form>
+    <a-table
+        :dataSource="dataSource"
+        :columns="columns"
+        :pagination="pagination"
+    >
+        <template #title>
+            <div style="font-weight:600; font-size: 20px;">第{{level}}层</div></template>
+        <template #bodyCell="{ text, column, record }">
+            <template v-if="Number.isFinite(+column.key)">
+                <span>
+                    {{ getDisplayType(column.key, {
+                        OFF: column.key === '31004' ? '4'
+                            : column.key === '40011' ? '4.5'
+                            : column.key === '40012' ? '40.5' : undefined
+                    })(text) }}
+                </span>
+            </template>
+            <template v-else-if="column.key === 'operator'">
                 <span>
                     <a @click="() => handleDelete(record)">删除</a>
                 </span>
+            </template>
+            <template v-else>
+                {{ text }}
             </template>
         </template>
     </a-table>
 </template>
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, onBeforeRouteUpdate } from "vue-router";
 import { deleteDevice, getDeviceList, getIpList } from '@api';
 import { message, Modal } from 'ant-design-vue';
+import { computed } from 'vue';
+import io from 'socket.io-client';
 
-const columns = [
+let socket = null
+const opts = ref([])
+const selectValue = ref([]);
+const dataSource = ref([]);
+const pagination = reactive({ total: 0, pageSize: 40 })
+const route = useRoute();
+const highlightedCells = reactive({})
+
+const level = computed(() => route.params.floorId)
+
+const columns = computed(() => {
+    const column = [
     {
         title: '设备编号',
         dataIndex: 'deviceId',
         key: 'deviceId',
     },
     {
-        title: '所属网关IP',
+        title: 'IP',
         dataIndex: 'ip',
         key: 'ip',
     },
     {
-        title: '网关DADR',
-        dataIndex: 'DADR',
-        key: 'DADR',
+        title: '设备状态反馈',
+        dataIndex: '31001',
+        key: '31001',
     },
     {
-        title: '本机地址',
-        dataIndex: 'localAddress',
-        key: 'localAddress',
+        title: '风机速度反馈',
+        dataIndex: '31002',
+        key: '31002',
     },
     {
-        title: '楼层',
-        dataIndex: 'level',
-        key: 'level',
+        title: '实际温度反馈',
+        dataIndex: '31003',
+        key: '31003',
+    },
+    {
+        title: '目标温度反馈',
+        dataIndex: '31004',
+        key: '31004',
+    },
+    {
+        title: '门磁状态反馈',
+        dataIndex: '31011',
+        key: '31011',
+    },
+    {
+        title: '制冷、制热模式',
+        dataIndex: '40001',
+        key: '40001',
+    },
+    {
+        title: '温度修正',
+        dataIndex: '40005',
+        key: '40005',
+    },
+    {
+        title: '制热节能模式下限值',
+        dataIndex: '40011',
+        key: '40011',
+    },
+    {
+        title: '制冷节能模式上限值',
+        dataIndex: '40012',
+        key: '40012',
+    },
+    {
+        title: '门磁功能',
+        dataIndex: '40038',
+        key: '40038',
+    },
+    {
+        title: '设备状态设定',
+        dataIndex: '40101',
+        key: '40101',
+    },
+    {
+        title: '风机速度设定',
+        dataIndex: '40102',
+        key: '40102',
+    },
+    {
+        title: '目标温度设定',
+        dataIndex: '40103',
+        key: '40103',
     },
     {
         title: '备注',
@@ -67,14 +148,18 @@ const columns = [
         key: 'operator',
     },
 
-]
-
-const opts = ref([])
-const selectValue = ref([]);
-const dataSource = ref([]);
-const pagination = reactive({ total: 0, pageSize: 20 })
-const route = useRoute();
-
+    ]
+    return column.map(item => ({
+    ...item,
+    align: 'center',
+    customCell: (record, _, columnIndex) => {
+        const cellKey = `${record.id}-${columnIndex.dataIndex}`;
+        return  {
+            class: highlightedCells[cellKey]? 'highlighted' : ''
+        }
+    }
+}))
+});
 onBeforeRouteUpdate((to, from) => {
     to.meta.label = `第${to.params.floorId}楼`
 })
@@ -82,11 +167,59 @@ onBeforeRouteUpdate((to, from) => {
 onMounted(() => {
     getDeviceTableList()
     getIpOptList()
+    connectSock()
 })
+
+onBeforeUnmount(() => {
+    socket?.disconnect?.();  // 在组件销毁之前断开连接
+    socket = null
+})
+
+const connectSock = () => {
+    socket = io('http://localhost:3000/deviceIo');  // 连接到WebSocket服务器
+
+    socket.on('connect', () => {
+        console.log('Connected to the WebSocket server.');
+    });
+
+    // Listen for 'server-message' event from the server
+    socket.on('updateDevices', (message) => {
+        console.log('Message received:', message);
+        addMessageTodataSource(message)
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from the WebSocket server.');
+    });
+}
+
+const addMessageTodataSource = (message) => {
+    if (message?.length && dataSource.value?.length) {
+        for (let mes of message) {
+            dataSource.value.forEach(item => {
+                const { id, } = item
+                if (id === mes.id) {
+                    item[mes.attr] = mes.val
+                    setHighlight(id, mes.attr)
+                }
+            })
+        }
+    }
+
+}
+
+const setHighlight = (id, field) => {
+    const key = `${id}-${field}`;
+    highlightedCells[key] = true
+
+    setTimeout(() => {
+        highlightedCells[key] = false
+    }, 1000); // 1秒后移除高亮
+}
 
 const getIpOptList = async () => {
     const data = await getIpList({
-        level: route.params.floorId
+        level: level.value
     })
     opts.value = data.map(item => ({ label: item, value: item }))
 }
@@ -114,4 +247,69 @@ const handleDelete = (item) => {
         cancelText: '取消'
     })
 }
+
+const getDisplayType = (type, { OFF }) => (value) => {
+    if (value === undefined || value === null || value === '') {
+        return '-'
+    }
+    const val = Number(value)
+    const statusMap = {
+        1: '开机',
+        3: '关机',
+        4: '锁屏',
+    }
+    const speedMap = {
+        0: '停机',
+        33: '低速',
+        66: '中速',
+        100: '高速',
+    }
+    const status01Map = {
+        0: '打开',
+        1: '闭合',
+    }
+    const status03Map = {
+        0: '失效',
+        3: '启用',
+    }
+    const mode01Map = {
+        0: '制热模式',
+        1: '制冷模式',
+    }
+    const tempDisplay = (c) => `${c}°C`
+    switch (type) {
+        case '31001':
+        case '40101':
+             return statusMap[val] || '-'
+        case '31002':
+        case '40102':
+            return speedMap[val] || '-'
+        case '31004':
+        case '40011':
+        case '40012':
+            if (val === OFF) return 'OFF'
+            return tempDisplay(val) || '-'
+        case '31011':
+            return status01Map[val] || '-'
+        case '40001':
+            return mode01Map[val] || '-'
+        case '40038':
+            return status03Map[val] || '-'
+        default:
+            return tempDisplay(val) || '-'
+    }
+}
+
+
 </script>
+
+<style lang="less">
+:where(.css-dev-only-do-not-override-1hsjdkk).ant-card .ant-card-body {
+    padding-left: 0;
+    padding-right: 0;
+}
+.highlighted {
+  background-color: sandybrown; /* 高亮颜色 */
+  transition: background-color 1s ease-out;
+}
+</style>

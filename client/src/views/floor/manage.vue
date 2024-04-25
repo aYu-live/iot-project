@@ -132,10 +132,10 @@ const dummyRequest = ({ file, onSuccess }) => {
 
 const transFloorList = (data) => {
     try {
-    const result = data.reduce((acc, { 所属网关IP: ip, 楼层: level }) => {
+    const result = data.reduce((acc, { ip, level }) => {
         const found = acc.find(e => e.level === level);
         if(!found){
-            acc.push({level, ip:[ip]});
+            acc.push({ level, ip:[ip], isDelete: false });
         }else{
             !found.ip.includes(ip) && found.ip.push(ip);
         }
@@ -160,21 +160,18 @@ const handleBeforeUpload = (file) => {
         const json = XLSX.utils.sheet_to_json(worksheet);
         floorList = transFloorList(json);
         deviceList = json.map(({
-            设备编号: deviceId,
-            所在房间: room,
-            所属网关IP: ip,
-            网关DADR: DADR,
-            本机地址: localAddress,
-            楼层: level,
-            备注: remark
+            deviceId,
+            room,
+            ip,
+            level,
+            remark
         }) => ({
             deviceId,
             room,
-            DADR,
             ip,
-            localAddress,
             level,
             remark,
+            isDelete: false
         }))
     };
     reader.onloadend = async () => {

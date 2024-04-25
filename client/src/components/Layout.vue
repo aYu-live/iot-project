@@ -1,6 +1,6 @@
 <template>
     <a-layout :class="$style.layout">
-        <a-layout-sider width="200" collapsible v-model:collapsed="collapsed">
+        <a-layout-sider width="200" collapsible v-model:collapsed="collapsed" style="overflow: auto;">
             <slot name="logo" :collapsed="collapsed"></slot>
             <a-menu theme="dark" mode="inline" @click="onClickMenu" :selectedKeys="selectedKeys"
                     :openKeys="selectedKeys" style="margin-top: 10px;">
@@ -97,6 +97,7 @@ export default {
 
 <style lang="less" module>
 .layout {
+    overflow: hidden;
     height: 100vh;
 
     :global {

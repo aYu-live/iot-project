@@ -23,7 +23,6 @@ export class DeviceController {
       const found = await this.deviceService.getDevice({
         ip: data.ip,
         deviceId: data.deviceId,
-        isDelete: false,
       });
       if (found) {
         // 如果找到IP和deviceId匹配的现存记录, 更新它

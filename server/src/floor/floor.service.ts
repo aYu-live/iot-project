@@ -60,8 +60,23 @@ export class FloorService {
   }
 
   createFloor(list: Floor[]) {
+    const res = [];
     try {
-      return this.floorRepository.save(list);
+      list.forEach(async (item) => {
+        const floor = await this.floorRepository.findOneBy({
+          level: item.level,
+        });
+
+        if (floor?.level) {
+          if (Array.isArray(floor?.ip)) {
+            item.ip = Array.from(new Set([...floor?.ip, ...(item?.ip || [])]));
+          } else {
+            item.ip = item?.ip || [];
+          }
+        }
+        res.push(await this.floorRepository.save(item));
+      });
+      return res;
     } catch (err) {
       console.log(err);
     }

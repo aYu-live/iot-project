@@ -25,12 +25,6 @@ export class Device {
   @Column()
   deviceId: string;
 
-  @Column()
-  DADR: string;
-
-  @Column()
-  localAddress: string;
-
   @Column({ nullable: true })
   remark: string;
 
@@ -44,8 +38,44 @@ export class Device {
   @Column({ default: false })
   isDelete: boolean;
 
-  @Column({ nullable: true })
-  temperature: string;
+  @Column({ comment: '设备状态反馈', default: '' })
+  31001: string;
+
+  @Column({ comment: '风机速度反馈', default: '' })
+  31002: string;
+
+  @Column({ comment: '实际温度反馈', default: '' })
+  31003: string;
+
+  @Column({ comment: '目标温度反馈', default: '' })
+  31004: string;
+
+  @Column({ comment: '门磁状态反馈', default: '' })
+  31011: string;
+
+  @Column({ comment: '制冷、制热模式', default: '' })
+  40001: string;
+
+  @Column({ comment: '温度修正', default: '' })
+  40005: string;
+
+  @Column({ comment: '制热节能模式下限值', default: '' })
+  40011: string;
+
+  @Column({ comment: '制冷节能模式上限值', default: '' })
+  40012: string;
+
+  @Column({ comment: '门磁功能', default: '' })
+  40038: string;
+
+  @Column({ comment: '设备状态设定', default: '' })
+  40101: string;
+
+  @Column({ comment: '风机速度设定', default: '' })
+  40102: string;
+
+  @Column({ comment: '目标温度设定', default: '' })
+  40103: string;
 
   @CreateDateColumn()
   createAt: Date;

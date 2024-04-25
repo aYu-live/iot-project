@@ -6,6 +6,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { DeviceModule } from './device/device.module';
 import { FloorModule } from './floor/floor.module';
+import { SensorModule } from './sensor/sensor.module';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 @Module({
@@ -33,6 +34,7 @@ const IS_PROD = process.env.NODE_ENV === 'production';
     }),
     FloorModule,
     DeviceModule,
+    SensorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
