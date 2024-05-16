@@ -47,7 +47,7 @@ export class SensorService {
           ip,
           deviceId,
         });
-        if (device?.id && device[attr] !== val) {
+        if (device?.id && (device[attr] !== val || !device.online)) {
           await this.deviceRepository.save({
             ...device,
             [attr]: val,
