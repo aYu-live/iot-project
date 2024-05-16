@@ -11,7 +11,7 @@ function useMenuList () {
     const menuList = computed(() => {
         const floorChildren = floorList.value.map(item => ({
             route: `/floor/${item.level}`,
-            label: `第${item.level}楼`,
+            label: item?.alias || `第${item.level}层`,
             component: () => import('../views/floor/list.vue')
         }))
         return [

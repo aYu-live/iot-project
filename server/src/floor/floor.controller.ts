@@ -12,6 +12,15 @@ export class FloorController {
     return { code: 200, data: { list, total } };
   }
 
+  @Get('info')
+  async getFloor(@Query() query?: { level: number }) {
+    const data = await this.floorService.getFloor({
+      level: Number(query?.level),
+    });
+
+    return { code: 200, data };
+  }
+
   @Get('ip/list')
   async getIpList(@Query() query?: Floor) {
     const data = await this.floorService.getIpList(query);

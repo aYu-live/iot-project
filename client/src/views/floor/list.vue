@@ -21,7 +21,7 @@
         :row-class-name="(record) => (record.online ?  null : 'off-line')"
     >
         <template #title>
-            <div style="font-weight:600; font-size: 20px;">第{{level}}层</div></template>
+            <div style="font-weight:600; font-size: 20px;">{{level}}</div></template>
         <template #bodyCell="{ text, column, record }">
             <template v-if="Number.isFinite(+column.key)">
                 <span>
@@ -45,8 +45,8 @@
 </template>
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
-import { useRoute, onBeforeRouteUpdate } from "vue-router";
-import { deleteDevice, getDeviceList, getIpList } from '@api';
+import { useRoute, useRouter } from "vue-router";
+import { deleteDevice, getDeviceList, getIpList, getFloorInfo } from '@api';
 import { message, Modal } from 'ant-design-vue';
 import { computed } from 'vue';
 import io from 'socket.io-client';
@@ -58,8 +58,12 @@ const dataSource = ref([]);
 const pagination = reactive({ total: 0, pageSize: 40 })
 const route = useRoute();
 const highlightedCells = reactive({})
+const level = ref();
 
-const level = computed(() => route.params.floorId)
+onMounted(async () => {
+    const floor = await getFloorInfo({ level: route.params.floorId })
+    level.value =  floor?.alias || `第${floor.level}层`
+})
 
 const columns = computed(() => {
     const column = [
@@ -161,9 +165,6 @@ const columns = computed(() => {
     }
 }))
 });
-onBeforeRouteUpdate((to, from) => {
-    to.meta.label = `第${to.params.floorId}楼`
-})
 
 onMounted(() => {
     getDeviceTableList()
@@ -222,7 +223,7 @@ const setHighlight = (id, field) => {
 
 const getIpOptList = async () => {
     const data = await getIpList({
-        level: level.value
+        level: route.params.floorId
     })
     opts.value = data.map(item => ({ label: item, value: item }))
 }

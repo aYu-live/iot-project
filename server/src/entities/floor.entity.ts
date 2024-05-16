@@ -19,6 +19,9 @@ export class Floor {
   @OneToMany(() => Device, (device) => device.floor)
   deviceId: Device[];
 
+  @Column({ default: '' })
+  alias: string;
+
   @CreateDateColumn()
   createAt: Date;
 

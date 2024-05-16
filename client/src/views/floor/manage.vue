@@ -120,7 +120,7 @@ const getTableList = async ({first, params}) => {
     dataSource.value = list
     pagination.total = total
     if (first) {
-        levelOpts.value = list.map(item => ({ label: `第${item.level}楼`, value: item.level }))
+        levelOpts.value = list.map(item => ({ label: item?.alias || `第${item.level}层`, value: item.level }))
     }
 }
 // 这个方法阻止Upload组件自动上传文件

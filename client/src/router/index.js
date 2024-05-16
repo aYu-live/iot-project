@@ -1,4 +1,5 @@
 
+import { getFloorInfo } from '@api'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [{
@@ -19,8 +20,10 @@ const routes = [{
 {
     path: '/floor/:floorId',
     meta: { parent: [{ path: '/floor', label: '楼层' }] },
-    beforeEnter: (to, _, next) => {
-        to.meta.label = `第${to.params.floorId}楼`
+    beforeEnter: async (to, _, next) => {
+        const level = to.params.floorId
+        const floor = await getFloorInfo({ level })
+        to.meta.label = floor?.alias || `第${level}层`
         next()
     },
     component: () => import('../views/floor/list.vue')
