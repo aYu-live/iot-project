@@ -29,7 +29,7 @@ export class SensorService {
   ) {}
 
   // 每半分钟执行一次的定时任务
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_SECOND)
   async handleCron() {
     const list = await this.floorRepository.find();
     if (!list?.length) return;
@@ -51,6 +51,7 @@ export class SensorService {
           await this.deviceRepository.save({
             ...device,
             [attr]: val,
+            online: true,
           });
         }
         const sensor = await this.sensorRepository.find({
@@ -116,10 +117,17 @@ export class SensorService {
     return res;
   }
 
-  async getSensor(query: Sensor) {
+  async getSensor(query: Partial<Sensor>) {
     const { ip, deviceId, attr } = query;
     return this.sensorRepository.find({
-      where: { ip, deviceId, attr },
+      where: {
+        ip,
+        deviceId,
+        attr,
+      },
+      order: {
+        createAt: 'DESC',
+      },
     });
   }
 }

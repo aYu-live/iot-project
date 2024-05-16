@@ -18,6 +18,7 @@
         :dataSource="dataSource"
         :columns="columns"
         :pagination="pagination"
+        :row-class-name="(record) => (record.online ?  null : 'off-line')"
     >
         <template #title>
             <div style="font-weight:600; font-size: 20px;">第{{level}}层</div></template>
@@ -201,6 +202,7 @@ const addMessageTodataSource = (message) => {
                 const { id, } = item
                 if (id === mes.id) {
                     item[mes.attr] = mes.val
+                    item.online = true
                     setHighlight(id, mes.attr)
                 }
             })
@@ -309,8 +311,23 @@ const getDisplayType = (type, { OFF }) => (value) => {
     padding-left: 0;
     padding-right: 0;
 }
+:where(.css-dev-only-do-not-override-1hsjdkk).ant-table-wrapper .ant-table-tbody >tr.ant-table-row:hover>td.highlighted, :where(.css-dev-only-do-not-override-1hsjdkk).ant-table-wrapper .ant-table-tbody >tr >td.ant-table-cell-row-hover.highlighted {
+    background-color: sandybrown; /* 高亮颜色 */
+    transition: background-color 1s ease-out;
+}
 .highlighted {
   background-color: sandybrown; /* 高亮颜色 */
   transition: background-color 1s ease-out;
+}
+
+:where(.css-dev-only-do-not-override-1hsjdkk).ant-table-wrapper .ant-table-tbody >tr.ant-table-row.off-line:hover>td, :where(.css-dev-only-do-not-override-1hsjdkk).ant-table-wrapper .ant-table-tbody >tr.off-line >td.ant-table-cell-row-hover {
+    opacity: 0.5 !important;
+    background: rgb(157, 155, 155, .3) !important;
+    color: #222 !important;
+}
+.off-line, .off-line>td {
+    opacity: 0.5 !important;
+    background: rgb(157, 155, 155, .3) !important;
+    color: #222 !important;
 }
 </style>

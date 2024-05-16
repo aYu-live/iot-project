@@ -13,7 +13,7 @@ export class FloorService {
     private floorRepository: Repository<Floor>,
   ) {}
 
-  getFloorList(params?: FloorWithLevelArray) {
+  async getFloorList(params?: FloorWithLevelArray) {
     const queryBuilder = this.floorRepository
       .createQueryBuilder('floor')
       .leftJoinAndSelect('floor.deviceId', 'device')
@@ -47,8 +47,21 @@ export class FloorService {
         queryBuilder.andWhere('floor.level = :level', { level: params.level });
       }
     }
-    queryBuilder.addOrderBy('floor.level', 'ASC');
-    return queryBuilder.getManyAndCount();
+    const [data, total] = await queryBuilder
+      .addOrderBy('floor.level', 'ASC')
+      .getManyAndCount();
+
+    return [
+      data.map((item) => {
+        const device = item;
+        device.deviceId = item?.deviceId?.filter?.((d) => !d.isDelete);
+        device.ip = item.ip.filter(
+          (ip) => item.deviceId.findIndex((d) => d.ip === ip) > -1,
+        );
+        return device;
+      }),
+      total,
+    ];
   }
 
   getFloor(floor?: Partial<Floor>) {

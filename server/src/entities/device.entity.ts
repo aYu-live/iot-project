@@ -38,6 +38,9 @@ export class Device {
   @Column({ default: false })
   isDelete: boolean;
 
+  @Column({ default: false })
+  online: boolean;
+
   @Column({ comment: '设备状态反馈', default: '' })
   31001: string;
 
