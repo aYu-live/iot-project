@@ -88,13 +88,13 @@ export class DeviceService {
     try {
       const res = await lastValueFrom(
         this.httpService.post(url, req, {
-          timeout: 3000,
+          timeout: 10000,
           headers: headersRequest,
         }),
       );
       return res.data;
     } catch (err) {
-      Logger.error(`请求接口报错: [url:${url}][err: ${err}]`);
+      Logger.error(`写入接口报错: [url:${url}][err: ${err}]`);
     }
     return { result: false };
   }
