@@ -174,7 +174,7 @@ const handleUpdate = async (key) => {
         return message.error('密码校验失败，请重新输入密码')
     }
     const res = await updateDevice({
-        id: formState.id,
+        id: formState.value.id,
         key,
         value: formState.value[key]
     })
