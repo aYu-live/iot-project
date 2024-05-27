@@ -94,7 +94,7 @@ export class DeviceService {
       );
       return res.data;
     } catch (err) {
-      Logger.error(`写入接口报错: [url:${url}][err: ${err}]`);
+      Logger.error(`写入接口报错: [url:${url}][req:${req}][err: ${err}]`);
     }
     return { result: false };
   }
