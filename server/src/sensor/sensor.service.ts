@@ -83,11 +83,11 @@ export class SensorService {
     let data = [];
     try {
       const response = await lastValueFrom(
-        this.httpService.get(apiUrl(ip), { timeout: 3000 }),
+        this.httpService.get(apiUrl(ip), { timeout: 10000 }),
       );
       data = response?.data?.val || [];
     } catch (err) {
-      // Logger.error(`请求接口报错: [url:${apiUrl(ip)}][err: ${err}]`);
+      Logger.error(`写入接口报错: [url:${apiUrl(ip)}][err: ${err}]`);
     }
     if (!data?.length) return [];
     const res = [];
