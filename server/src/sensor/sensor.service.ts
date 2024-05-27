@@ -29,7 +29,7 @@ export class SensorService {
   ) {}
 
   // 每半分钟执行一次的定时任务
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleCron() {
     const list = await this.floorRepository.find();
     if (!list?.length) return;
@@ -87,7 +87,7 @@ export class SensorService {
       );
       data = response?.data?.val || [];
     } catch (err) {
-      Logger.error(`请求接口报错: [url:${apiUrl(ip)}][err: ${err}]`);
+      // Logger.error(`请求接口报错: [url:${apiUrl(ip)}][err: ${err}]`);
     }
     if (!data?.length) return [];
     const res = [];
