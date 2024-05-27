@@ -29,7 +29,7 @@ export class SensorService {
   ) {}
 
   // 每半分钟执行一次的定时任务
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async handleCron() {
     const list = await this.floorRepository.find();
     if (!list?.length) return;
