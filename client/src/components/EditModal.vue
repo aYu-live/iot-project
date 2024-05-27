@@ -5,7 +5,7 @@
         destroyOnClose
         @cancel="onCancel"
         @afterClose="onCancel"
-        width="900"
+        width="900px"
     >
         <a-form
             ref="formRef"
