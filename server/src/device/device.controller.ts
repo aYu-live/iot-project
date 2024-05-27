@@ -50,7 +50,6 @@ export class DeviceController {
   @Put('update')
   async updateDevice(@Body() body: Device & { key: string; value: string }) {
     const data = await this.deviceService.getDevice({ id: body.id });
-    console.log(data)
     try {
       const res = await this.deviceService.updateDevice({
         ...body,

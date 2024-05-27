@@ -64,10 +64,10 @@ export class SensorService {
             createAt: 'DESC',
           },
         });
+
         if (sensor?.[0]?.val !== val) {
           newData.push({
             ...item,
-            id: device?.id,
           });
         }
       }

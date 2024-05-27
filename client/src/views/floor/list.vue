@@ -210,8 +210,11 @@ const addMessageTodataSource = (message) => {
     if (message?.length && dataSource.value?.length) {
         for (let mes of message) {
             dataSource.value.forEach(item => {
-                const { id, } = item
-                if (id === mes.id) {
+                const { id, ip, attr, deviceId } = item
+                if (
+                    deviceId === mes.deviceId &&
+                    ip === mes.ip
+                ) {
                     item[mes.attr] = mes.val
                     item.online = true
                     setHighlight(id, mes.attr)

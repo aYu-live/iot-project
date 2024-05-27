@@ -66,7 +66,6 @@ export class DeviceService {
     device: Device & { key: string; value: string },
   ): Promise<any> {
     const { ip, deviceId } = device;
-    console.log('device', device)
     const ipStr = ip.split('.').join('/');
     const url = `http://${ip}/ctrlRequest`;
     const headersRequest = {
