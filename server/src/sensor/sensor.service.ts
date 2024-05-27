@@ -87,7 +87,7 @@ export class SensorService {
       );
       data = response?.data?.val || [];
     } catch (err) {
-      Logger.error(`请求接口报错: [url:${apiUrl(ip)}][err: ${err}]`);
+      // Logger.error(`请求接口报错: [url:${apiUrl(ip)}][err: ${err}]`);
     }
     if (!data?.length) return [];
     const res = [];

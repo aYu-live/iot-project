@@ -9,6 +9,7 @@
                 <div class="action">
                     <p>{{remark.created_at}}<span style="margin-left: 20px;">备注于 {{remark.source_id_info}}</span></p>
                     <a @click="deleteRemark(remark.id)">删除</a>
+                    <a @click="deleteRemark(remark.id)">操作</a>
                 </div>
             </div>
         </div>

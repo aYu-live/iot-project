@@ -34,7 +34,10 @@
             </template>
             <template v-else-if="column.key === 'operator'">
                 <span>
-                    <a @click="() => handleDelete(record)">删除</a>
+                    <a v-if="false" @click="() => handleDelete(record)">删除</a>
+                </span>
+                <span>
+                    <a @click="() => handleOpenEditModal(record)">操作</a>
                 </span>
             </template>
             <template v-else>
@@ -42,6 +45,7 @@
             </template>
         </template>
     </a-table>
+    <edit-modal :open="record.visible" :record="record" @cancel="cancel" @success="success"></edit-modal>
 </template>
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
@@ -49,6 +53,8 @@ import { useRoute, useRouter } from "vue-router";
 import { deleteDevice, getDeviceList, getIpList, getFloorInfo } from '@api';
 import { message, Modal } from 'ant-design-vue';
 import { computed } from 'vue';
+import { statusMap, mode01Map, speedMap } from '@/constants'
+import EditModal from '@/components/EditModal.vue'
 import io from 'socket.io-client';
 
 let socket = null
@@ -59,6 +65,9 @@ const pagination = reactive({ total: 0, pageSize: 40 })
 const route = useRoute();
 const highlightedCells = reactive({})
 const level = ref();
+const record = ref({
+    visible: false
+})
 
 onMounted(async () => {
     const floor = await getFloorInfo({ level: route.params.floorId })
@@ -151,6 +160,7 @@ const columns = computed(() => {
         title: '操作',
         dataIndex: 'operator',
         key: 'operator',
+        width: 120
     },
 
     ]
@@ -257,17 +267,7 @@ const getDisplayType = (type, { OFF }) => (value) => {
         return '-'
     }
     const val = Number(value)
-    const statusMap = {
-        1: '开机',
-        3: '关机',
-        4: '锁屏',
-    }
-    const speedMap = {
-        0: '停机',
-        33: '低速',
-        66: '中速',
-        100: '高速',
-    }
+    
     const status01Map = {
         0: '打开',
         1: '闭合',
@@ -276,10 +276,7 @@ const getDisplayType = (type, { OFF }) => (value) => {
         0: '失效',
         3: '启用',
     }
-    const mode01Map = {
-        0: '制热模式',
-        1: '制冷模式',
-    }
+
     const tempDisplay = (c) => `${c}°C`
     switch (type) {
         case '31001':
@@ -302,6 +299,27 @@ const getDisplayType = (type, { OFF }) => (value) => {
         default:
             return tempDisplay(val) || '-'
     }
+}
+
+const handleOpenEditModal = (item) => {
+    record.value = {
+        ...item,
+        visible: true
+    }
+}
+
+const liveRecord = computed(() => {
+    return dataSource.value.find(item => item.id === record.value.id)
+})
+
+const cancel = () => {
+    record.value = {
+        visible: false
+    }
+}
+
+const success = () => {
+    getDeviceTableList(selectValue.value)
 }
 
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { Device } from 'src/entities/device.entity';
 import { DeviceService } from './device.service';
 import { FloorService } from '../floor/floor.service';
@@ -42,8 +42,22 @@ export class DeviceController {
   }
 
   @Post('delete')
-  async deleteFloor(@Body() body: Device) {
+  async deleteDevice(@Body() body: Device) {
     const data = await this.deviceService.deleteDevice(body);
     return { code: 200, data };
+  }
+
+  @Put('update')
+  async updateDevice(@Body() body: Device & { key: string; value: string }) {
+    const data = await this.deviceService.getDevice({ id: body.id });
+    try {
+      const res = await this.deviceService.updateDevice({
+        ...body,
+        ...data,
+      });
+      return { code: 200, data: res };
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

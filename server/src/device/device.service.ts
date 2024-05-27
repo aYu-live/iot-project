@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { lastValueFrom } from 'rxjs';
 import { Device } from 'src/entities/device.entity';
 import { Brackets, Repository } from 'typeorm';
 
@@ -11,6 +13,7 @@ export class DeviceService {
   constructor(
     @InjectRepository(Device)
     private deviceRepository: Repository<Device>,
+    private httpService: HttpService,
   ) {}
 
   getDeviceList(params: DeviceWithIPArray) {
@@ -57,5 +60,42 @@ export class DeviceService {
 
   deleteDevice(device: Device) {
     return this.deviceRepository.update(device.id, { isDelete: true });
+  }
+
+  async updateDevice(
+    device: Device & { key: string; value: string },
+  ): Promise<any> {
+    const { ip, deviceId } = device;
+    const ipStr = ip.split('.').join('/');
+    const url = `http://${ip}/ctrlRequest`;
+    const headersRequest = {
+      accept: '*/*',
+      'accept-language':
+        'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-TW;q=0.6,be;q=0.5,ru;q=0.4,uk;q=0.3',
+      'cache-control': 'no-cache',
+      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      pragma: 'no-cache',
+    };
+
+    const req =
+      'requestData=' +
+      encodeURIComponent(
+        JSON.stringify({
+          id: `${ipStr}-${deviceId}.${device.key}`,
+          val: `${device.value}`,
+        }),
+      );
+    try {
+      const res = await lastValueFrom(
+        this.httpService.post(url, req, {
+          timeout: 3000,
+          headers: headersRequest,
+        }),
+      );
+      return res.data;
+    } catch (err) {
+      Logger.error(`请求接口报错: [url:${url}][err: ${err}]`);
+    }
+    return { result: false };
   }
 }
