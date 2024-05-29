@@ -94,8 +94,15 @@ export class FloorService {
       console.log(err);
     }
   }
-  deleteFloor(floor: Floor) {
-    return this.floorRepository.update(floor.level, { isDelete: true });
+  deleteFloor(floor: Floor | number[]) {
+    let level: number | number[];
+    if (Array.isArray(floor)) {
+      level = floor;
+    } else {
+      level = floor.level;
+    }
+
+    return this.floorRepository.update(level, { isDelete: true });
   }
   async getIpList(floor: Floor) {
     const where = {

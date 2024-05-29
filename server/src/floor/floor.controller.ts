@@ -34,7 +34,7 @@ export class FloorController {
   }
 
   @Post('delete')
-  async deleteFloor(@Body() body: Floor) {
+  async deleteFloor(@Body() body: Floor | number[]) {
     const data = await this.floorService.deleteFloor(body);
     return { code: 200, data };
   }

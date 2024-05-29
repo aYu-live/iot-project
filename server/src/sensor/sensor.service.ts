@@ -31,7 +31,11 @@ export class SensorService {
   // 每半分钟执行一次的定时任务
   @Cron(CronExpression.EVERY_SECOND)
   async handleCron() {
-    const list = await this.floorRepository.find();
+    const list = await this.floorRepository.find({
+      where: {
+        isDelete: false,
+      },
+    });
     if (!list?.length) return;
     const allIps = list.map((item) => item.ip).flat();
     if (!allIps?.length) return;

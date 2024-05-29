@@ -26,20 +26,31 @@
                 />
             </a-form-item>
         </a-form>
-        <a-upload
-            :before-upload="handleBeforeUpload"
-            :customRequest="dummyRequest"
-            :fileList="[]"
-            accept=".xlsx, .xls"
-        >
-            <a-button>
-                <a-icon type="upload" /> 点击上传Excel
+        <a-space>
+            <a-upload
+                :before-upload="handleBeforeUpload"
+                :customRequest="dummyRequest"
+                :fileList="[]"
+                accept=".xlsx, .xls"
+            >
+                <a-button>
+                    <a-icon type="upload" /> 点击上传Excel
+                </a-button>
+            </a-upload>
+            <a-button type="primary" :disabled="!hasSelected" @click="handleBatchDelete">
+                批量删除
             </a-button>
-        </a-upload>
+        </a-space>
         <a-table
+
             :dataSource="dataSource"
             :columns="columns"
             :pagination="pagination"
+            :row-key="record => record.level"
+            :row-selection="{
+                selectedRowKeys: selectedRowKeys,
+                onChange: onSelectChange
+            }"
         >
             <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'deviceId'">
@@ -63,6 +74,7 @@ import { message, Modal } from 'ant-design-vue';
 import { reactive, ref, onMounted } from 'vue';
 import { getFloorList, createFloorList, deleteFloor, createDeviceList, getIpList } from '@api'
 import * as XLSX from 'xlsx';
+import { computed } from 'vue';
 
 const columns = [
     {
@@ -101,7 +113,8 @@ const dataSource = ref([]);
 const ipList = ref([])
 const levelOpts = ref([])
 const pagination = reactive({ total: 0, disabled: true,  pageSize: 999 })
-
+const selectedRowKeys = ref([])
+const hasSelected = computed(() => selectedRowKeys.value.length > 0)
 onMounted(() => {
     getTableList({first: true})
     getIps()
@@ -200,6 +213,26 @@ const handleDelete = (item) => {
         content: '是否删除该楼层信息',
         onOk: async (close) => {
             await deleteFloor(item)
+            getTableList({params: formModel.value})
+            message.success('删除成功', 1, close)
+            
+        },
+        okText: '确定',
+        cancelText: '取消'
+    })
+}
+
+const onSelectChange = (keys) => {
+  selectedRowKeys.value = keys;
+};
+
+const handleBatchDelete = () => {
+    Modal.confirm({
+        title: '确认删除',
+        content: '是否批量删除选中的楼层',
+        onOk: async (close) => {
+            await deleteFloor(selectedRowKeys.value)
+            selectedRowKeys.value = []
             getTableList({params: formModel.value})
             message.success('删除成功', 1, close)
             

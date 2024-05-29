@@ -12,21 +12,32 @@
             :model="formState"
             v-bind="formItemLayout"
         >
-            <a-form-item label="房间号">
-                <span class="ant-form-text">{{ formState.room }}</span>
-            </a-form-item>
-            <a-form-item label="备注">
-                <span class="ant-form-text">{{ formState.remark || '--' }}</span>
-            </a-form-item>
-            <a-form-item label="所属网关">
-                <span class="ant-form-text">{{ formState.ip }}</span>
-            </a-form-item>
-            <a-form-item label="设备编号">
-                <span class="ant-form-text">{{ formState.deviceId }}</span>
-            </a-form-item>
-            <a-form-item label="状态">
-                <span class="ant-form-text">{{ formState.online ? '在线' : '离线' }}</span>
-            </a-form-item>
+            <template v-if="isSingle">
+                <a-form-item label="房间号">
+                    <span class="ant-form-text">{{ formState.room }}</span>
+                </a-form-item>
+                <a-form-item label="备注">
+                    <span class="ant-form-text">{{ formState.remark || '--' }}</span>
+                </a-form-item>
+                <a-form-item label="所属网关">
+                    <span class="ant-form-text">{{ formState.ip }}</span>
+                </a-form-item>
+                <a-form-item label="设备编号">
+                    <span class="ant-form-text">{{ formState.deviceId }}</span>
+                </a-form-item>
+                <a-form-item label="状态">
+                    <span class="ant-form-text">{{ formState.online ? '在线' : '离线' }}</span>
+                </a-form-item>
+            </template>
+            <template v-else-if="props.selectedRowKeys.length > 0">
+                <div style="margin-bottom: 30px;">
+                    包括设备有
+                    <br/>
+                    <a-tag style="padding: 2px; margin: 2px 4px;" v-for="item in props.selectedRowKeys" :key="item.id">
+                        {{renderTxt(item)}}
+                    </a-tag>
+            </div>
+            </template>
             <a-form-item label="密码" :rules="[{ required: true, message: '请输入密码' }]">
                 <a-input-password v-model:value="formState.password" placeholder="请输入密码" :min="1" :max="10" />
             </a-form-item>
@@ -85,8 +96,14 @@ import { updateDevice } from '@api';
 
 const props = defineProps({
     open: Boolean,
-    record: Object
+    record: Object,
+    selectedRowKeys: {
+        type: Array,
+        default: () => []
+    }
 })
+
+const isSingle = computed(() => !props.record.isBatch)
 
 const emits = defineEmits(['cancel', 'success'])
 const formItemLayout = {
@@ -109,13 +126,13 @@ const formInitState = {
 
 const formState = ref({
     ...formInitState,
-    ...(props.record || {})
+    ...(isSingle.value ? (props.record || {}) : {})
 })
 
 watch(
   () => props.record,
   (newRecord) => {
-    if (newRecord) {
+    if (newRecord && isSingle.value) {
         formState.value = {
             ...formInitState,
             ...newRecord,
@@ -156,14 +173,11 @@ const statusOpts = computed(() => {
         label: statusMap[item]
     }))
 })
-const onOk = () => {
-    if (!formState.value.password || formState.value.password !== 'ecosync') {
-        message.error('密码有误，请重新输入')
-        return
-    }
-    console.log(1)
-}
 
+const renderTxt = (key) => {
+    const [_, ip, deviceId ] = key.split('-');
+    return `${ip}-${deviceId}`
+}
 const onCancel = () => {
     formState.value = {...formInitState}
     emits('cancel')
@@ -173,15 +187,22 @@ const handleUpdate = async (key) => {
     if (!formState.value.password || formState.value.password !== '1234') {
         return message.error('密码校验失败，请重新输入密码')
     }
-    const res = await updateDevice({
-        id: formState.value.id,
+    const params = {
         key,
         value: formState.value[key]
-    })
+    }
+    if (isSingle.value) {
+        params.id = formState.value.id;
+    } else {
+        params.ids = props.selectedRowKeys.map(item => item.split('-')[0])
+    }
+    const res = await updateDevice(params)
     if (res.result) {
         emits('success')
         message.success('更新成功')
+        return;
     }
+    message.error(res.message || '更新失败')
 }
 </script>
 

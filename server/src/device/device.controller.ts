@@ -48,12 +48,15 @@ export class DeviceController {
   }
 
   @Put('update')
-  async updateDevice(@Body() body: Device & { key: string; value: string }) {
-    const data = await this.deviceService.getDevice({ id: body.id });
+  async updateDevice(
+    @Body() body: { id?: number; ids: number[]; key: string; value: string },
+  ) {
+    const ids = body?.id ? [body.id] : body?.ids;
+    const data = await this.deviceService.getDeviceListById(ids);
     try {
-      const res = await this.deviceService.updateDevice({
-        ...body,
-        ...data,
+      const res = await this.deviceService.updateDevice(data, {
+        key: body.key,
+        value: body.value,
       });
       return { code: 200, data: res };
     } catch (err) {

@@ -14,11 +14,21 @@
                 />
             </a-form-item>
     </a-form>
+    <a-space>
+        <a-button type="primary" :disabled="!hasSelected" @click="handleOpenBtachEditModal">
+            批量更新
+        </a-button>
+    </a-space>
     <a-table
         :dataSource="dataSource"
         :columns="columns"
         :pagination="pagination"
         :row-class-name="(record) => (record.online ?  null : 'off-line')"
+        :row-key="record => `${record.id}-${record.ip}-${record.deviceId}`"
+            :row-selection="{
+                selectedRowKeys: selectedRowKeys,
+                onChange: onSelectChange
+            }"
     >
         <template #title>
             <div style="font-weight:600; font-size: 20px;">{{level}}</div></template>
@@ -45,11 +55,11 @@
             </template>
         </template>
     </a-table>
-    <edit-modal :open="record.visible" :record="record" @cancel="cancel" @success="success"></edit-modal>
+    <edit-modal :open="record.visible" :record="record" :selected-row-keys="selectedRowKeys" @cancel="cancel" @success="success"></edit-modal>
 </template>
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { deleteDevice, getDeviceList, getIpList, getFloorInfo } from '@api';
 import { message, Modal } from 'ant-design-vue';
 import { computed } from 'vue';
@@ -68,6 +78,8 @@ const level = ref();
 const record = ref({
     visible: false
 })
+const selectedRowKeys = ref([])
+const hasSelected = computed(() => selectedRowKeys.value.length > 0)
 
 onMounted(async () => {
     const floor = await getFloorInfo({ level: route.params.floorId })
@@ -304,10 +316,17 @@ const getDisplayType = (type, { OFF }) => (value) => {
     }
 }
 
-const handleOpenEditModal = (item) => {
+const handleOpenEditModal = (item = {}) => {
     record.value = {
         ...item,
         visible: true
+    }
+}
+
+const handleOpenBtachEditModal = () => {
+    record.value = {
+        visible: true,
+        isBatch: true
     }
 }
 
@@ -317,7 +336,8 @@ const liveRecord = computed(() => {
 
 const cancel = () => {
     record.value = {
-        visible: false
+        visible: false,
+        isBatch: false
     }
 }
 
@@ -325,6 +345,9 @@ const success = () => {
     getDeviceTableList(selectValue.value)
 }
 
+const onSelectChange = (keys) => {
+    selectedRowKeys.value = keys
+}
 
 </script>
 

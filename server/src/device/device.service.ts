@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { lastValueFrom } from 'rxjs';
 import { Device } from 'src/entities/device.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 
 interface DeviceWithIPArray extends Omit<Device, 'ip'> {
   ip: string[];
@@ -54,6 +54,12 @@ export class DeviceService {
     });
   }
 
+  getDeviceListById(ids: number[]) {
+    return this.deviceRepository.findBy({
+      id: In(ids),
+    });
+  }
+
   async upsertDevice(list: Device[]) {
     return this.deviceRepository.save(list);
   }
@@ -63,38 +69,71 @@ export class DeviceService {
   }
 
   async updateDevice(
-    device: Device & { key: string; value: string },
+    devices: Device[],
+    updateInfo: { key: string; value: string },
   ): Promise<any> {
-    const { ip, deviceId } = device;
-    const ipStr = ip.split('.').join('/');
-    const url = `http://${ip}/ctrlRequest`;
-    const headersRequest = {
-      accept: '*/*',
-      'accept-language':
-        'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-TW;q=0.6,be;q=0.5,ru;q=0.4,uk;q=0.3',
-      'cache-control': 'no-cache',
-      'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      pragma: 'no-cache',
-    };
+    let reqList;
+    if (Array.isArray(devices)) {
+      reqList = devices;
+    } else {
+      reqList = [devices];
+    }
+    const primiseList = reqList.map((device) => {
+      const { ip, deviceId } = device;
+      const { key, value } = updateInfo;
+      const ipStr = ip.split('.').join('/');
+      const url = `http://${ip}/ctrlRequest`;
+      const headersRequest = {
+        accept: '*/*',
+        'accept-language':
+          'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-TW;q=0.6,be;q=0.5,ru;q=0.4,uk;q=0.3',
+        'cache-control': 'no-cache',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        pragma: 'no-cache',
+      };
 
-    const req =
-      'requestData=' +
-      encodeURIComponent(
-        JSON.stringify({
-          id: `${ipStr}-${deviceId}.${device.key}`,
-          val: `${device.value}`,
-        }),
-      );
-    try {
-      const res = await lastValueFrom(
+      const req =
+        'requestData=' +
+        encodeURIComponent(
+          JSON.stringify({
+            id: `${ipStr}-${deviceId}.${key}`,
+            val: `${value}`,
+          }),
+        );
+
+      return lastValueFrom(
         this.httpService.post(url, req, {
           timeout: 10000,
           headers: headersRequest,
         }),
       );
-      return res.data;
-    } catch (err) {
-      Logger.error(`写入接口报错: [url:${url}][req:${req}][err: ${err}]`);
+    });
+    try {
+      const results = await Promise.allSettled(primiseList);
+      const res = { result: true, message: '' };
+      const failList = [];
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          // console.log('成功结果:', result.value.data.result);
+          // console.log('成功结果:', result.value.config.data);
+        } else {
+          res.result = false;
+          const jsonPart = decodeURIComponent(result.reason.config.data).split(
+            '=',
+          )[1];
+          const parsedObject = JSON.parse(jsonPart);
+          const idContent = parsedObject?.id;
+          idContent && failList.push(idContent);
+        }
+      });
+      if (failList?.length) {
+        Logger.error('写入接口报错，包括：' + failList.join('、'));
+        res.message = `更新失败。其中失败的设备有：
+        ${failList.join('、')}`;
+      }
+      return res;
+    } catch (error) {
+      Logger.error('写入操作报错，具体如下：' + error);
     }
     return { result: false };
   }
