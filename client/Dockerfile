@@ -1,5 +1,5 @@
 # 基于官方Node镜像
-FROM node:lts
+FROM node:20.12.2
 
 # 设置工作目录
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY ./package.json ./pnpm-lock.yaml /app/
 
 # 安装globals
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm@9.0.4
 
 # 安装client依赖
 RUN pnpm install

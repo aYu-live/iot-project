@@ -1,12 +1,12 @@
 # 基于官方Node镜像
-FROM node:lts
+FROM node:20.12.2
 
 # 设置工作目录
 WORKDIR /app
 
 
 # 安装globals
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm@9.0.4
 
 # 复制package.json和pnpm-lock.yaml文件
 COPY ./package.json ./pnpm-lock.yaml /app/
