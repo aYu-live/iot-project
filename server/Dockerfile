@@ -6,6 +6,7 @@ WORKDIR /app
 
 
 # 安装globals
+RUN npm config set registry https://registry.npmmirror.com/
 RUN npm install -g pnpm@9.0.4
 
 # 复制package.json和pnpm-lock.yaml文件

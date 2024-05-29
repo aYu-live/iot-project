@@ -8,6 +8,7 @@ WORKDIR /app
 COPY ./package.json ./pnpm-lock.yaml /app/
 
 # 安装globals
+RUN npm config set registry https://registry.npmmirror.com/
 RUN npm install -g pnpm@9.0.4
 
 # 安装client依赖
