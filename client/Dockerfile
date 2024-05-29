@@ -10,7 +10,7 @@ COPY ./package.json ./pnpm-lock.yaml /app/
 # 安装globals
 RUN npm install -g pnpm@latest
 
-# 安装依赖
+# 安装client依赖
 RUN pnpm install
 
 

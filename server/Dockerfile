@@ -11,7 +11,7 @@ RUN npm install -g pnpm@latest
 # 复制package.json和pnpm-lock.yaml文件
 COPY ./package.json ./pnpm-lock.yaml /app/
 
-# 安装依赖
+# 安装server依赖
 RUN pnpm install
 
 
