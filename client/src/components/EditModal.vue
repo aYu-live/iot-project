@@ -217,7 +217,7 @@ const handleUpdate = async (key, value) => {
 
     const params = {
         key,
-        value: formState.value[key]
+        value: value || formState.value[key]
     }
     if (isSingle.value) {
         params.id = formState.value.id;
