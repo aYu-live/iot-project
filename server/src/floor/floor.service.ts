@@ -118,8 +118,7 @@ export class FloorService {
   }
 
   async renameFloor(floor: Floor) {
-    console.log(floor)
     const { alias, level } = floor;
-    return this.floorRepository.update(level, { alias })
+    return this.floorRepository.update(level, { alias });
   }
 }

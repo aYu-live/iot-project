@@ -13,3 +13,6 @@ export const getDeviceList = async (data) => $http.get('/api/device/list', data)
 export const createDeviceList = async (data) => $http.post('/api/device/create', data)
 export const deleteDevice = async (data) => $http.post('/api/device/delete', data)
 export const updateDevice = async (data) => $http.put('/api/device/update', data)
+
+export const validatePwd = async (data) => $http.post('/api/user/validate', data)
+export const updateNormal = async (data) => $http.put('/api/user/updateNormal', data)

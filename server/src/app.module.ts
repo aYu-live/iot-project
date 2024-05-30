@@ -7,6 +7,7 @@ import { join } from 'path';
 import { DeviceModule } from './device/device.module';
 import { FloorModule } from './floor/floor.module';
 import { SensorModule } from './sensor/sensor.module';
+import { UserModule } from './user/user.module';
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 @Module({
@@ -35,6 +36,7 @@ const IS_PROD = process.env.NODE_ENV === 'production';
     FloorModule,
     DeviceModule,
     SensorModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

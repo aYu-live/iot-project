@@ -1,6 +1,14 @@
 <template>
-    <a-spin :spinning="loading">
-        <a-form
+    <template v-if="!isSuperAdmin">
+        <h1>请先输入超级管理员密码</h1>
+        <div style="margin: 20px 100px;">
+            <a-input v-model:value="pwd" placeholder="请输入超级管理员密码"></a-input>
+            <div style="height: 20px;"></div>
+            <a-button block type="primary" @click="handleValidate">校验密码</a-button>
+        </div>
+    </template>
+    <a-spin v-else :spinning="loading">
+        <!-- <a-form
             :label-col="labelCol"
             style="max-width: 600px"
         >
@@ -25,7 +33,7 @@
                     @change="onChange"
                 />
             </a-form-item>
-        </a-form>
+        </a-form> -->
         <a-space>
             <a-upload
                 :before-upload="handleBeforeUpload"
@@ -40,6 +48,7 @@
             <a-button type="primary" :disabled="!hasSelected" @click="handleBatchDelete">
                 批量删除
             </a-button>
+            <a-button type="dashed" @click="pwdRecord.visible = true">改普通密码</a-button>
         </a-space>
         <a-table
 
@@ -70,6 +79,9 @@
         <a-modal v-model:open="renameRecord.visible" ok-text="提交" title="楼层重命名" @ok="handleRenameFloor" @cancel="cancelRenameFloor" destroy-on-close cancel-text="取消">
             <a-input v-model:value="renameRecord.alias"</a-input>
         </a-modal>
+        <a-modal v-model:open="pwdRecord.visible" ok-text="提交" title="更改普通密码" @ok="handleUpdatePwd" @cancel="handleCancelPwd" destroy-on-close cancel-text="取消">
+            <a-input v-model:value="pwdRecord.pwd"</a-input>
+        </a-modal>
     </a-spin>
 </template>
 
@@ -79,7 +91,9 @@ import { reactive, ref, onMounted } from 'vue';
 import { getFloorList, createFloorList, deleteFloor, createDeviceList, getIpList, renameFloor } from '@api'
 import * as XLSX from 'xlsx';
 import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useMenuList } from '@/hooks/menuList';
+import { useAdmin } from '@/hooks/useAdmin'
 
 const columns = [
     {
@@ -109,7 +123,14 @@ const columns = [
 ]
 
 const labelCol = { style: { width: '50px' } };
-const {init} = useMenuList()
+const { init } = useMenuList()
+const { validateAdmin, updateNormalAdmin } = useAdmin()
+const { isSuperAdmin } = storeToRefs(useAdmin())
+const pwdRecord = reactive({
+    visible: false,
+    pwd: ''
+})
+const pwd = ref('')
 
 const formModel = ref({
     ip: [],
@@ -270,4 +291,19 @@ const cancelRenameFloor = () => {
     renameRecord.level = undefined
     renameRecord.visible = false
 }
+
+const handleValidate = () => {
+    validateAdmin(pwd.value, 'super')
+}
+
+const handleUpdatePwd = async () =>{
+    await updateNormalAdmin(pwdRecord.pwd)
+    handleCancelPwd()
+}
+
+const handleCancelPwd = () => {
+    pwdRecord.visible = false;
+    pwdRecord.pwd = ''
+}
+
 </script>

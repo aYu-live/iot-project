@@ -7,6 +7,7 @@
         @afterClose="onCancel"
         width="900px"
     >
+    <a-spin :spinning="loading.value"  wrapperClassName="router-spin">
         <a-form
             ref="formRef"
             :model="formState"
@@ -96,14 +97,21 @@
                 <a-button style="margin-left: 20px" @click="handleUpdate('40103')" type="primary" :disabled="disabled">更新</a-button>
             </a-form-item>
         </a-form>
+        </a-spin>
     </a-modal>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Form, FormItem, InputPassword, InputNumber, RadioGroup, Select, Modal, message } from 'ant-design-vue';
+import { Form, FormItem, InputPassword, InputNumber, RadioGroup, Select, Modal, Spin, message } from 'ant-design-vue';
 import { statusMap, mode01Map, speedMap, status03Map } from '@/constants'
 import { updateDevice } from '@api';
+import { useAdmin } from '@/hooks/useAdmin'
+import axios from '@/plugins/tool-axios'
+
+
+const loading = computed(() => axios.loading)
+const { validateAdmin } = useAdmin()
 
 const props = defineProps({
     open: Boolean,
@@ -202,12 +210,11 @@ const onCancel = () => {
 }
 
 const handleUpdate = async (key, value) => {
-    if (!formState.value.password || formState.value.password !== '1234') {
+    const passPwd = await validateAdmin(formState.value.password, ['normal', 'super'])
+    if (!passPwd) {
         return message.error('密码校验失败，请重新输入密码')
     }
-    if (value !== undefined) {
-        formState.value[key] = value
-    }
+
     const params = {
         key,
         value: formState.value[key]
@@ -217,9 +224,14 @@ const handleUpdate = async (key, value) => {
     } else {
         params.ids = props.selectedRowKeys.map(item => item.split('-')[0])
     }
+    
     const res = await updateDevice(params)
     if (res.result) {
         emits('success')
+
+        if (value !== undefined) {
+            formState.value[key] = value
+        }
         message.success('更新成功')
         return;
     }

@@ -34,7 +34,6 @@ const router = createRouter({
 
 
 router.beforeEach(async (to, from, next) => {
-    console.log(to)
     if (to.fullPath.startsWith('/floor')) {
         const level = to.params.floorId
         if (level) {
