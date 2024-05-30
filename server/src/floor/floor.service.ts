@@ -64,6 +64,15 @@ export class FloorService {
     ];
   }
 
+  getMenuList() {
+    return this.floorRepository.findAndCount({
+      order: {
+        level: 'ASC',
+      },
+      select: ['alias', 'level']
+    });
+  }
+
   getFloor(floor?: Partial<Floor>) {
     return this.floorRepository.findOne({
       where: {

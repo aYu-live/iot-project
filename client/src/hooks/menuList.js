@@ -1,4 +1,4 @@
-import { getFloorList } from '@api'
+import { getMenuList } from '@api'
 import { onBeforeMount, ref } from 'vue'
 import { computed, defineAsyncComponent } from 'vue'
 import { defineStore } from 'pinia'
@@ -6,7 +6,7 @@ import { defineStore } from 'pinia'
 export const useMenuList = defineStore('menuList', () => {
     const floorList = ref([])
     const init = async () => {
-        const { list } = await getFloorList()
+        const { list } = await getMenuList()
         floorList.value = list
     }
     const menuList = computed(() => {

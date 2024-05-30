@@ -152,10 +152,7 @@ const hasSelected = computed(() => selectedRowKeys.value.length > 0)
 const renameRecord = reactive({
     visible: false
 })
-onMounted(() => {
-    getTableList({first: true})
-    getIps()
-})
+
 const onChange = async () => {
     getTableList({params: formModel.value})
 }
@@ -298,8 +295,12 @@ const cancelRenameFloor = () => {
     renameRecord.visible = false
 }
 
-const handleValidate = () => {
-    validateAdmin(pwd.value, 'super')
+const handleValidate = async () => {
+    const flag = validateAdmin(pwd.value, 'super')
+    if (flag) {
+        getTableList({first: true})
+        getIps()
+    }
 }
 
 const handleUpdatePwd = async () =>{

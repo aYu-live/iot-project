@@ -4,6 +4,7 @@ const $http = axios.$http
 export const getIpList = async (data) => $http.get('/api/floor/ip/list', data)
 
 export const getFloorList = async (data) => $http.get('/api/floor/list', data)
+export const getMenuList = async (data) => $http.get('/api/floor/menu/list', data)
 export const getFloorInfo = async (data) => $http.get('/api/floor/info', data)
 export const createFloorList = async (data) => $http.post('/api/floor/create', data)
 export const deleteFloor = async (data) => $http.post('/api/floor/delete', data)

@@ -12,6 +12,11 @@ export class FloorController {
     return { code: 200, data: { list, total } };
   }
 
+  @Get('menu/list')
+  async getMenuList() {
+    const [list, total] = await this.floorService.getMenuList();
+    return { code: 200, data: { list, total } };
+  }
   @Get('info')
   async getFloor(@Query() query?: { level: number }) {
     const data = await this.floorService.getFloor({
