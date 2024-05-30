@@ -63,7 +63,7 @@
         >
             <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'deviceId'">
-                    {{ record.deviceId.map(item => item.id).join('、') }}
+                    {{ record.deviceId.map(item => item.deviceId).join('、') }}
                 </template>
                 <template v-else-if="column.key === 'ip'">
                     {{ record.ip.join('、') }}
@@ -100,6 +100,12 @@ const columns = [
         title: '楼层',
         dataIndex: 'level',
         key: 'level',
+        width: 80
+    },
+    {
+        title: '别名',
+        dataIndex: 'alias',
+        key: 'alias',
         width: 80
     },
     {
