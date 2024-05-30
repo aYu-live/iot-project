@@ -1,5 +1,5 @@
 <template>
-     <a-form
+     <!-- <a-form
             style="max-width: 600px"
         >
             <a-form-item label="网关IP">
@@ -13,7 +13,7 @@
                     @change="onChange"
                 />
             </a-form-item>
-    </a-form>
+    </a-form> -->
     <a-space>
         <a-button type="primary" :disabled="!hasSelected" @click="handleOpenBtachEditModal">
             批量更新
@@ -24,7 +24,7 @@
         :columns="columns"
         :pagination="pagination"
         :row-class-name="(record) => (record.online ?  null : 'off-line')"
-        :row-key="record => `${record.id}-${record.ip}-${record.deviceId}`"
+        :row-key="record => `${record.id}-${record.room}`"
             :row-selection="{
                 selectedRowKeys: selectedRowKeys,
                 onChange: onSelectChange
@@ -63,7 +63,7 @@ import { useRoute } from "vue-router";
 import { deleteDevice, getDeviceList, getIpList, getFloorInfo } from '@api';
 import { message, Modal } from 'ant-design-vue';
 import { computed } from 'vue';
-import { statusMap, mode01Map, speedMap } from '@/constants'
+import { statusMap, mode01Map, speedMap, status03Map } from '@/constants'
 import EditModal from '@/components/EditModal.vue'
 import io from 'socket.io-client';
 
@@ -89,15 +89,20 @@ onMounted(async () => {
 const columns = computed(() => {
     const column = [
     {
-        title: '设备编号',
-        dataIndex: 'deviceId',
-        key: 'deviceId',
+        title: '房间号',
+        dataIndex: 'room',
+        key: 'room',
     },
     {
-        title: 'IP',
-        dataIndex: 'ip',
-        key: 'ip',
+        title: '备注',
+        dataIndex: 'remark',
+        key: 'remark',
     },
+    // {
+    //     title: 'IP',
+    //     dataIndex: 'ip',
+    //     key: 'ip',
+    // },
     {
         title: '设备状态反馈',
         dataIndex: '31001',
@@ -162,11 +167,6 @@ const columns = computed(() => {
         title: '目标温度设定',
         dataIndex: '40103',
         key: '40103',
-    },
-    {
-        title: '备注',
-        dataIndex: 'remark',
-        key: 'remark',
     },
     {
         title: '操作',
@@ -286,10 +286,6 @@ const getDisplayType = (type, { OFF }) => (value) => {
     const status01Map = {
         0: '打开',
         1: '闭合',
-    }
-    const status03Map = {
-        0: '失效',
-        3: '启用',
     }
 
     const tempDisplay = (c) => `${c}°C`

@@ -31,7 +31,7 @@
             </template>
             <template v-else-if="props.selectedRowKeys.length > 0">
                 <div style="margin-bottom: 30px;">
-                    包括设备有
+                    批量操作的房间号：
                     <br/>
                     <a-tag style="padding: 2px; margin: 2px 4px;" v-for="item in props.selectedRowKeys" :key="item.id">
                         {{renderTxt(item)}}
@@ -48,9 +48,9 @@
                 has-feedback
                 :rules="[{ required: true, message: '请选择模式' }]"
             >
-                <a-radio-group v-model:value="formState['40101']" placeholder="请选择模式" option-type="button" :options="statusOpts">
+                <a-radio-group :value="formState['40101']" placeholder="请选择模式" option-type="button" :options="statusOpts" @change="e => handleUpdate('40101', e.target.value)" :disabled="disabled">
                 </a-radio-group>
-                <a-button style="margin-left: 20px" @click="handleUpdate('40101')" type="primary" :disabled="disabled">更新</a-button>
+                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40101')" type="primary" :disabled="disabled">更新</a-button> -->
             </a-form-item>
             <a-form-item
                 class="radio-select"
@@ -59,9 +59,9 @@
                 has-feedback
                 :rules="[{ required: true, message: '请选择风速' }]"
             >
-                <a-radio-group v-model:value="formState['40102']" placeholder="请选择风速" option-type="button" :options="speedOpts">
+                <a-radio-group :value="formState['40102']" placeholder="请选择风速" option-type="button" :options="speedOpts" @change="e => handleUpdate('40102', e.target.value)" :disabled="disabled">
                 </a-radio-group>
-                <a-button style="margin-left: 20px" @click="handleUpdate('40102')" type="primary" :disabled="disabled">更新</a-button>
+                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40102')" type="primary" :disabled="disabled">更新</a-button> -->
             </a-form-item>
             <a-form-item
                 class="radio-select"
@@ -70,9 +70,20 @@
                 has-feedback
                 :rules="[{ required: true, message: '请切换制冷热模式' }]"
             >
-                <a-radio-group v-model:value="formState['40001']" placeholder="请切换制冷热模式" option-type="button" :options="mode01Opts">
+                <a-radio-group :value="formState['40001']" placeholder="请切换制冷热模式" option-type="button" :options="mode01Opts" @change="e => handleUpdate('40001', e.target.value)" :disabled="disabled">
                 </a-radio-group>
-                <a-button style="margin-left: 20px" @click="handleUpdate('40001')" type="primary" :disabled="disabled">更新</a-button>
+                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40001')" type="primary" :disabled="disabled">更新</a-button> -->
+            </a-form-item>
+            <a-form-item
+                class="radio-select"
+                name="40038"
+                label="门磁功能"
+                has-feedback
+                :rules="[{ required: true, message: '请选择门磁功能' }]"
+            >
+                <a-radio-group :value="formState['40038']" placeholder="请选择门磁功能" option-type="button" :options="status03Opts" @change="e => handleUpdate('40038', e.target.value)" :disabled="disabled">
+                </a-radio-group>
+                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40001')" type="primary" :disabled="disabled">更新</a-button> -->
             </a-form-item>
             <a-form-item
                 class="radio-select"
@@ -91,7 +102,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Form, FormItem, InputPassword, InputNumber, RadioGroup, Select, Modal, message } from 'ant-design-vue';
-import { statusMap, mode01Map, speedMap } from '@/constants'
+import { statusMap, mode01Map, speedMap, status03Map } from '@/constants'
 import { updateDevice } from '@api';
 
 const props = defineProps({
@@ -121,7 +132,7 @@ const formInitState = {
     40101: '',
     40102: '',
     40103: '',
-
+    40038: '',
 }
 
 const formState = ref({
@@ -139,6 +150,7 @@ watch(
             40001: String(Number(newRecord[40001])),
             40101: String(Number(newRecord[40101])),
             40102: String(Number(newRecord[40102])),
+            40038: String(Number(newRecord[40038])),
             40103: String(Number(newRecord[40103])) || '',
         };
     } else {
@@ -174,18 +186,27 @@ const statusOpts = computed(() => {
     }))
 })
 
+const status03Opts = computed(() => {
+    return Object.keys(status03Map).sort((a, b) => a - b > 0).map(item => ({
+        value: item,
+        label: status03Map[item]
+    }))
+})
 const renderTxt = (key) => {
-    const [_, ip, deviceId ] = key.split('-');
-    return `${ip}-${deviceId}`
+    const [_, room ] = key.split('-');
+    return `${room}`
 }
 const onCancel = () => {
     formState.value = {...formInitState}
     emits('cancel')
 }
 
-const handleUpdate = async (key) => {
+const handleUpdate = async (key, value) => {
     if (!formState.value.password || formState.value.password !== '1234') {
         return message.error('密码校验失败，请重新输入密码')
+    }
+    if (value !== undefined) {
+        formState.value[key] = value
     }
     const params = {
         key,
@@ -204,6 +225,7 @@ const handleUpdate = async (key) => {
     }
     message.error(res.message || '更新失败')
 }
+
 </script>
 
 <style lang="less">

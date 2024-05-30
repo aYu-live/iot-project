@@ -15,3 +15,8 @@ export const speedMap = {
     66: '中速',
     100: '高速',
 }
+
+export const status03Map = {
+    0: '失效',
+    3: '启用',
+}
