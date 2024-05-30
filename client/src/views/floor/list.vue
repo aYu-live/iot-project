@@ -299,7 +299,7 @@ const getDisplayType = (type, { OFF }) => (value) => {
         case '31004':
         case '40011':
         case '40012':
-            if (val === OFF) return 'OFF'
+            if (val === Number(OFF)) return 'OFF'
             return tempDisplay(val) || '-'
         case '31011':
             return status01Map[val] || '-'
