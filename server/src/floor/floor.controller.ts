@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { Floor } from 'src/entities/floor.entity';
 import { FloorService } from './floor.service';
 
@@ -36,6 +36,12 @@ export class FloorController {
   @Post('delete')
   async deleteFloor(@Body() body: Floor | number[]) {
     const data = await this.floorService.deleteFloor(body);
+    return { code: 200, data };
+  }
+
+  @Put('rename')
+  async renameFloor(@Body() body: Floor) {
+    const data = await this.floorService.renameFloor(body);
     return { code: 200, data };
   }
 }

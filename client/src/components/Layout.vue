@@ -118,3 +118,10 @@ export default {
     }
 }
 </style>
+
+<style lang="less">
+.ant-menu-inline .ant-menu-item {
+    height: 34px;
+    line-height: 34px;
+}
+</style>

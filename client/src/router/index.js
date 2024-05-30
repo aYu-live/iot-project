@@ -20,29 +20,10 @@ const routes = [{
 {
     path: '/floor/:floorId',
     meta: { parent: [{ path: '/floor', label: '楼层' }] },
-    beforeEnter: async (to, _, next) => {
-        const level = to.params.floorId
-        const floor = await getFloorInfo({ level })
-        to.meta.label = floor?.alias || `第${level}层`
-        next()
-    },
     component: () => import('../views/floor/list.vue')
-},
-// meta标签label、parent用于面包屑显示(使用例子如下)
-// {
-//   path: '/restrict-list',
-//   meta: { label: '限制名单管理' },
-//   component: () => import('../views/restrictList/index.vue')
-// }, {
-//   path: '/restrict-list/add',
-//   meta: { label: '添加限制记录', parent: [{ path: '/restrict-list', label: '限制名单管理' }] },
-//   component: () => import('../views/restrictList/addRestrictRecord.vue')
-// }, {
-//   path: '/restrict-list/details',
-//   meta: { label: '详情', parent: [{ path: '/restrict-list', label: '限制名单管理' }] },
-//   component: () => import('../views/restrictList/details.vue')
-// }
+}
 ]
+
 
 
 
@@ -52,5 +33,16 @@ const router = createRouter({
 })
 
 
+router.beforeEach(async (to, from, next) => {
+    console.log(to)
+    if (to.fullPath.startsWith('/floor')) {
+        const level = to.params.floorId
+        if (level) {
+            const floor = await getFloorInfo({ level })
+            to.meta.label = floor?.alias || `第${level}层`
+        }
+    }
+    next()
+})
 
 export default router

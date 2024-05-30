@@ -116,4 +116,10 @@ export class FloorService {
     const uniqueIps = [...new Set(allIps)];
     return uniqueIps;
   }
+
+  async renameFloor(floor: Floor) {
+    console.log(floor)
+    const { alias, level } = floor;
+    return this.floorRepository.update(level, { alias })
+  }
 }

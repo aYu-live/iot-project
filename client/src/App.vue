@@ -4,7 +4,7 @@
             <template #logo="{ collapsed }">
                 <div class="logo">
                     <img src="./assets/logo.png" alt="logo">
-                    <span v-show="!collapsed">Ecosync系统</span>
+                    <span v-show="!collapsed">ES-FCU 系统</span>
                 </div>
             </template>
             <template #navigation>
@@ -23,41 +23,34 @@
                     </a-breadcrumb>
                 </div>
             </template>
-            <a-spin v-if="isRouterAlive" :spinning="loading"  wrapperClassName="router-spin">
+            <a-spin v-if="isRouterAlive" :spinning="loading.value"  wrapperClassName="router-spin">
                 <router-view :key="route.fullPath" />
             </a-spin>
         </layout>
     </div>
 </template>
 
-<script>
+<script setup>
 import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { CaretDownOutlined, EnvironmentOutlined, UserOutlined } from '@ant-design/icons-vue'
 import axios from './plugins/tool-axios'
+import { storeToRefs } from 'pinia';
 import Layout from '@/components/Layout.vue'
 import { useMenuList } from '@/hooks/menuList'
+import { onBeforeMount } from 'vue'
 
-export default {
-    name: 'App',
-    components: { Layout, CaretDownOutlined, EnvironmentOutlined, UserOutlined },
 
-    setup () {
-        // 根据券商生成菜单
-        const { menuList } = useMenuList()
-        // 获取员工列表
-        // 初始化项目
-        const { onClickMenu, route, breadcrumbList, isRouterAlive } = useInit()
-        return {
-            menuList,
-            onClickMenu,
-            route,
-            breadcrumbList,
-            loading: axios.loading,
-            isRouterAlive,
-        }
-    }
-}
+// 根据券商生成菜单
+const {init} = useMenuList()
+const loading = computed(() => axios.loading)
+const { menuList } = storeToRefs(useMenuList())
+// 获取员工列表
+// 初始化项目
+const { onClickMenu, route, breadcrumbList, isRouterAlive } = useInit()
+onBeforeMount(() => {
+    init()
+})
 
 function useInit () {
     const router = useRouter()

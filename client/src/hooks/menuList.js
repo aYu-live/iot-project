@@ -1,13 +1,14 @@
 import { getFloorList } from '@api'
 import { onBeforeMount, ref } from 'vue'
 import { computed, defineAsyncComponent } from 'vue'
+import { defineStore } from 'pinia'
 
-function useMenuList () {
+export const useMenuList = defineStore('menuList', () => {
     const floorList = ref([])
-    onBeforeMount(async () => {
+    const init = async () => {
         const { list } = await getFloorList()
         floorList.value = list
-    })
+    }
     const menuList = computed(() => {
         const floorChildren = floorList.value.map(item => ({
             route: `/floor/${item.level}`,
@@ -31,7 +32,6 @@ function useMenuList () {
             }
         ]
     })
-    return { menuList }
-}
+    return { menuList, init }
+})
 
-export { useMenuList }

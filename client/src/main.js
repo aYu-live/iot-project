@@ -5,5 +5,5 @@ import axios from './plugins/tool-axios'
 import App from './App.vue'
 import router from './router'
 import '@/assets/css/base.less'
-
-const app = createApp(App).use(antdv).use(router).use(axios).mount('#app')
+import { createPinia } from 'pinia'
+createApp(App).use(antdv).use(router).use(axios).use(createPinia()).mount('#app')

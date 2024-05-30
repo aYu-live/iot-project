@@ -60,21 +60,26 @@
                     {{ record.ip.join('、') }}
                 </template>
                 <template v-else-if="column.key === 'operator'">
-                    <span>
+                    <a-space>
                         <a @click="() => handleDelete(record)">删除</a>
-                    </span>
+                        <a @click="() => handleRename(record)">重命名</a>
+                    </a-space>
                 </template>
             </template>
         </a-table>
+        <a-modal v-model:open="renameRecord.visible" ok-text="提交" title="楼层重命名" @ok="handleRenameFloor" @cancel="cancelRenameFloor" destroy-on-close cancel-text="取消">
+            <a-input v-model:value="renameRecord.alias"</a-input>
+        </a-modal>
     </a-spin>
 </template>
 
 <script setup>
-import { message, Modal } from 'ant-design-vue';
+import { message, Modal, Space } from 'ant-design-vue';
 import { reactive, ref, onMounted } from 'vue';
-import { getFloorList, createFloorList, deleteFloor, createDeviceList, getIpList } from '@api'
+import { getFloorList, createFloorList, deleteFloor, createDeviceList, getIpList, renameFloor } from '@api'
 import * as XLSX from 'xlsx';
 import { computed } from 'vue';
+import { useMenuList } from '@/hooks/menuList';
 
 const columns = [
     {
@@ -98,12 +103,14 @@ const columns = [
         title: '操作',
         dataIndex: 'operator',
         key: 'operator',
-        width: 100
+        width: 120
     },
     
 ]
 
 const labelCol = { style: { width: '50px' } };
+const {init} = useMenuList()
+
 const formModel = ref({
     ip: [],
     level: []
@@ -115,6 +122,9 @@ const levelOpts = ref([])
 const pagination = reactive({ total: 0, disabled: true,  pageSize: 999 })
 const selectedRowKeys = ref([])
 const hasSelected = computed(() => selectedRowKeys.value.length > 0)
+const renameRecord = reactive({
+    visible: false
+})
 onMounted(() => {
     getTableList({first: true})
     getIps()
@@ -240,5 +250,24 @@ const handleBatchDelete = () => {
         okText: '确定',
         cancelText: '取消'
     })
+}
+
+const handleRename = (record) => {
+    renameRecord.level = record.level
+    renameRecord.visible = true
+    renameRecord.alias = record.alias
+}
+
+const handleRenameFloor = async (done) => {
+    await renameFloor(renameRecord)
+    getTableList({params: formModel.value})
+    init()
+    cancelRenameFloor()
+}
+
+const cancelRenameFloor = () => {
+    renameRecord.alias = ''
+    renameRecord.level = undefined
+    renameRecord.visible = false
 }
 </script>

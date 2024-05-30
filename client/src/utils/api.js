@@ -7,6 +7,7 @@ export const getFloorList = async (data) => $http.get('/api/floor/list', data)
 export const getFloorInfo = async (data) => $http.get('/api/floor/info', data)
 export const createFloorList = async (data) => $http.post('/api/floor/create', data)
 export const deleteFloor = async (data) => $http.post('/api/floor/delete', data)
+export const renameFloor = async (data) => $http.put('/api/floor/rename', data)
 
 export const getDeviceList = async (data) => $http.get('/api/device/list', data)
 export const createDeviceList = async (data) => $http.post('/api/device/create', data)
