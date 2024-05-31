@@ -26,8 +26,8 @@
             }"
     >
         <template #title>
-            <a-space style="font-weight:600; font-size: 20px;">
-                {{level}}
+            <a-space style="font-weight:600; font-size: 20px;display: flex;justify-content: space-between;">
+                <span>{{level}}</span>
                 <a-button type="primary" :disabled="!hasSelected" @click="handleOpenBtachEditModal">
                     批量修改
                 </a-button>

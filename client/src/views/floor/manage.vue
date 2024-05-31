@@ -226,6 +226,7 @@ const handleBeforeUpload = (file) => {
             await createFloorList(floorList)
             await createDeviceList(deviceList)
             getTableList({params: formModel.value})
+            init()
             message.success('上传成功')
         } finally {
             loading.value = false
