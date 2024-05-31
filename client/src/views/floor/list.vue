@@ -14,11 +14,6 @@
                 />
             </a-form-item>
     </a-form> -->
-    <a-space>
-        <a-button type="primary" :disabled="!hasSelected" @click="handleOpenBtachEditModal">
-            批量修改
-        </a-button>
-    </a-space>
     <a-table
         :dataSource="dataSource"
         :columns="columns"
@@ -31,7 +26,13 @@
             }"
     >
         <template #title>
-            <div style="font-weight:600; font-size: 20px;">{{level}}</div></template>
+            <a-space style="font-weight:600; font-size: 20px;">
+                {{level}}
+                <a-button type="primary" :disabled="!hasSelected" @click="handleOpenBtachEditModal">
+                    批量修改
+                </a-button>
+            </a-space>
+        </template>
         <template #bodyCell="{ text, column, record }">
             <template v-if="Number.isFinite(+column.key)">
                 <span>
