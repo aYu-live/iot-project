@@ -1,8 +1,8 @@
 <template>
     <template v-if="!isSuperAdmin">
-        <h1>请先输入超级管理员密码</h1>
+        <h1>请输入密码</h1>
         <div style="margin: 20px 100px;">
-            <a-input v-model:value="pwd" placeholder="请输入超级管理员密码"></a-input>
+            <a-input v-model:value="pwd" placeholder="请输入密码"></a-input>
             <div style="height: 20px;"></div>
             <a-button block type="primary" @click="handleValidate">校验密码</a-button>
         </div>

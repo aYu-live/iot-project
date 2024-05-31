@@ -2,7 +2,7 @@
     <div class="app">
         <layout @click-menu="onClickMenu" :menuList="menuList">
             <template #logo="{ collapsed }">
-                <div class="logo">
+                <div class="logo" @click="handleClick">
                     <img src="./assets/logo.png" alt="logo">
                     <span v-show="!collapsed">ES-FCU 系统</span>
                 </div>
@@ -38,19 +38,25 @@ import axios from './plugins/tool-axios'
 import { storeToRefs } from 'pinia';
 import Layout from '@/components/Layout.vue'
 import { useMenuList } from '@/hooks/menuList'
+import { useMultipleClick } from '@/hooks/useMultipleClick'
 import { onBeforeMount } from 'vue'
 
 
 // 根据券商生成菜单
 const {init} = useMenuList()
 const loading = computed(() => axios.loading)
-const { menuList } = storeToRefs(useMenuList())
+const { menuList, hidenFloorManage } = storeToRefs(useMenuList())
 // 获取员工列表
 // 初始化项目
 const { onClickMenu, route, breadcrumbList, isRouterAlive } = useInit()
+const addRoutes = () => {
+    hidenFloorManage.value = false;
+}
+const { handleClick  } = useMultipleClick(addRoutes, 10)
 onBeforeMount(() => {
     init()
 })
+
 
 function useInit () {
     const router = useRouter()

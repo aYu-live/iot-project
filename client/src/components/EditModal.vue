@@ -5,7 +5,7 @@
         destroyOnClose
         @cancel="onCancel"
         @afterClose="onCancel"
-        width="900px"
+        width="600px"
     >
     <a-spin :spinning="loading.value"  wrapperClassName="router-spin">
         <a-form
@@ -13,89 +13,132 @@
             :model="formState"
             v-bind="formItemLayout"
         >
-            <template v-if="isSingle">
-                <a-form-item label="房间号">
-                    <span class="ant-form-text">{{ formState.room }}</span>
-                </a-form-item>
-                <a-form-item label="备注">
-                    <span class="ant-form-text">{{ formState.remark || '--' }}</span>
-                </a-form-item>
-                <a-form-item label="所属网关">
-                    <span class="ant-form-text">{{ formState.ip }}</span>
-                </a-form-item>
-                <a-form-item label="设备编号">
-                    <span class="ant-form-text">{{ formState.deviceId }}</span>
-                </a-form-item>
-                <a-form-item label="状态">
-                    <span class="ant-form-text">{{ formState.online ? '在线' : '离线' }}</span>
-                </a-form-item>
-            </template>
-            <template v-else-if="props.selectedRowKeys.length > 0">
-                <div style="margin-bottom: 30px;">
-                    批量操作的房间号：
-                    <br/>
-                    <a-tag style="padding: 2px; margin: 2px 4px;" v-for="item in props.selectedRowKeys" :key="item.id">
-                        {{renderTxt(item)}}
-                    </a-tag>
-            </div>
-            </template>
-            <a-form-item label="密码" :rules="[{ required: true, message: '请输入密码' }]">
-                <a-input-password v-model:value="formState.password" placeholder="请输入密码" :min="1" :max="10" />
-            </a-form-item>
-            <a-form-item
-                class="radio-select"
-                name="40101"
-                label="模式"
-                has-feedback
-                :rules="[{ required: true, message: '请选择模式' }]"
-            >
-                <a-radio-group :value="formState['40101']" placeholder="请选择模式" option-type="button" :options="statusOpts" @change="e => handleUpdate('40101', e.target.value)" :disabled="disabled">
-                </a-radio-group>
-                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40101')" type="primary" :disabled="disabled">更新</a-button> -->
-            </a-form-item>
-            <a-form-item
-                class="radio-select"
-                name="40102"
-                label="风速"
-                has-feedback
-                :rules="[{ required: true, message: '请选择风速' }]"
-            >
-                <a-radio-group :value="formState['40102']" placeholder="请选择风速" option-type="button" :options="speedOpts" @change="e => handleUpdate('40102', e.target.value)" :disabled="disabled">
-                </a-radio-group>
-                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40102')" type="primary" :disabled="disabled">更新</a-button> -->
-            </a-form-item>
-            <a-form-item
-                class="radio-select"
-                name="40001"
-                label="冷热切换"
-                has-feedback
-                :rules="[{ required: true, message: '请切换制冷热模式' }]"
-            >
-                <a-radio-group :value="formState['40001']" placeholder="请切换制冷热模式" option-type="button" :options="mode01Opts" @change="e => handleUpdate('40001', e.target.value)" :disabled="disabled">
-                </a-radio-group>
-                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40001')" type="primary" :disabled="disabled">更新</a-button> -->
-            </a-form-item>
-            <a-form-item
-                class="radio-select"
-                name="40038"
-                label="门磁功能"
-                has-feedback
-                :rules="[{ required: true, message: '请选择门磁功能' }]"
-            >
-                <a-radio-group :value="formState['40038']" placeholder="请选择门磁功能" option-type="button" :options="status03Opts" @change="e => handleUpdate('40038', e.target.value)" :disabled="disabled">
-                </a-radio-group>
-                <!-- <a-button style="margin-left: 20px" @click="handleUpdate('40001')" type="primary" :disabled="disabled">更新</a-button> -->
-            </a-form-item>
-            <a-form-item
-                class="radio-select"
-                name="40103"
-                label="温度"
-                has-feedback
-                :rules="[{ required: true, message: '请输入温度' }]"
-            >
-                <a-input-number v-model:value="formState['40103']" min="5"  max="40" placeholder="请输入温度" addon-after="°C"></a-input-number>
-                <a-button style="margin-left: 20px" @click="handleUpdate('40103')" type="primary" :disabled="disabled">更新</a-button>
-            </a-form-item>
+            <a-row :gutter="24">
+                <template v-if="isSingle">
+                    <a-col :span="12">
+                        <a-form-item label="房间号">
+                            <span class="ant-form-text">{{ formState.room }}</span>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="备注">
+                            <span class="ant-form-text">{{ formState.remark || '--' }}</span>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="所属网关">
+                            <span class="ant-form-text">{{ formState.ip }}</span>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="设备编号">
+                            <span class="ant-form-text">{{ formState.deviceId }}</span>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="状态">
+                            <span class="ant-form-text">
+                                <a-tag :color="formState.online ? 'green' : 'gray'">
+                                    {{ formState.online ? '在线' : '离线' }}
+                                </a-tag>
+                                
+                            </span>
+                        </a-form-item>
+                    </a-col>
+                </template>
+                <template v-else-if="props.selectedRowKeys.length > 0">
+                    <div style="margin-bottom: 30px;">
+                        批量操作的房间号：
+                        <br/>
+                        <a-tag style="padding: 2px; margin: 2px 4px;" v-for="item in props.selectedRowKeys" :key="item.id">
+                            {{renderTxt(item)}}
+                        </a-tag>
+                </div>
+                </template>
+                <a-col :span="24">
+                    <a-form-item label="密码" :rules="[{ required: true, message: '请输入密码' }]">
+                        <a-input-password v-model:value="formState.password" placeholder="请输入密码" :min="1" :max="10" />
+                    </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                    <a-form-item
+                        class="radio-select"
+                        name="40101"
+                        label="模式"
+                        has-feedback
+                        :rules="[{ required: true, message: '请选择模式' }]"
+                    >
+                        <a-radio-group :value="formState['40101']" placeholder="请选择模式" option-type="button"  :disabled="disabled">
+                            <a-radio v-for="item in statusOpts" :key="item.label" :value="item.value" @click="handleRadioClick('40101', item.value)">
+                                {{ item.label }}
+                            </a-radio>
+                        </a-radio-group>
+                    </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                    <a-form-item
+                        class="radio-select"
+                        name="40102"
+                        label="风速"
+                        has-feedback
+                        :rules="[{ required: true, message: '请选择风速' }]"
+                    >
+                        <a-radio-group :value="formState['40102']" placeholder="请选择风速" option-type="button" :disabled="disabled">
+                            <a-radio v-for="item in speedOpts" :key="item.label" :value="item.value" @click="handleRadioClick('40102', item.value)">
+                                {{ item.label }}
+                            </a-radio>
+                        </a-radio-group>
+                    </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                    <a-form-item
+                        class="radio-select"
+                        name="40001"
+                        label="冷热切换"
+                        has-feedback
+                        :rules="[{ required: true, message: '请切换制冷热模式' }]"
+                    >
+                        <a-radio-group :value="formState['40001']" placeholder="请切换制冷热模式" option-type="button" :disabled="disabled">
+                            <a-radio v-for="item in mode01Opts" :key="item.label" :value="item.value" @click="handleRadioClick('40001', item.value)">
+                                {{ item.label }}
+                            </a-radio>
+                        </a-radio-group>
+                    </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                    <a-form-item
+                        class="radio-select"
+                        name="40038"
+                        label="门磁功能"
+                        has-feedback
+                        :rules="[{ required: true, message: '请选择门磁功能' }]"
+                        
+                    >
+                        <a-radio-group
+                            :value="formState['40038']"
+                            placeholder="请选择门磁功能"
+                            option-type="button"
+                            :disabled="disabled"
+                        >
+                            <a-radio v-for="item in status03Opts" :key="item.label" :value="item.value" @click="handleRadioClick('40038', item.value)">
+                                {{ item.label }}
+                            </a-radio>
+                        </a-radio-group>
+                    </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                    <a-form-item
+                        class="radio-select"
+                        name="40103"
+                        label="温度"
+                        has-feedback
+                        :rules="[{ required: true, message: '请输入温度' }]"
+                    >
+                        <a-input-number v-model:value="formState['40103']" min="5"  max="40" placeholder="请输入温度" addon-after="°C"></a-input-number>
+                        <a-button style="margin-left: 20px" @click="handleUpdate('40103')" type="primary" :disabled="disabled">更新</a-button>
+                    </a-form-item>
+                </a-col>
+            </a-row>
         </a-form>
         </a-spin>
     </a-modal>
@@ -103,7 +146,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Form, FormItem, InputPassword, InputNumber, RadioGroup, Select, Modal, Spin, message } from 'ant-design-vue';
+import { Form, FormItem, InputPassword, InputNumber, RadioGroup, Radio, Select, Modal, Spin, message, Row, Col } from 'ant-design-vue';
 import { statusMap, mode01Map, speedMap, status03Map } from '@/constants'
 import { updateDevice } from '@api';
 import { useAdmin } from '@/hooks/useAdmin'
@@ -228,7 +271,7 @@ const handleUpdate = async (key, value) => {
     const res = await updateDevice(params)
     if (res.result) {
         emits('success')
-
+        console.log(value)
         if (value !== undefined) {
             formState.value[key] = value
         }
@@ -238,11 +281,26 @@ const handleUpdate = async (key, value) => {
     message.error(res.message || '更新失败')
 }
 
+const handleRadioClick = async (key, targetValue) => {
+    await handleUpdate(key, targetValue);
+};
+
 </script>
 
 <style lang="less">
     &.ant-form-item.radio-select .ant-form-item-control-input-content {
         display: flex;
         justify-content: space-between;
+    }
+    .status {
+        position: relative;
+        &::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-width: 1px;
+            border-radius: 100%;
+        }
     }
 </style>

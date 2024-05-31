@@ -1,6 +1,6 @@
 <template>
     <a-layout :class="$style.layout">
-        <a-layout-sider width="200" collapsible v-model:collapsed="collapsed" style="overflow: auto;">
+        <a-layout-sider width="200" style="overflow: auto;">
             <slot name="logo" :collapsed="collapsed"></slot>
             <a-menu theme="dark" mode="inline" @click="onClickMenu" :selectedKeys="selectedKeys"
                     :openKeys="selectedKeys" style="margin-top: 10px;">
@@ -121,7 +121,8 @@ export default {
 
 <style lang="less">
 .ant-menu-inline .ant-menu-item {
-    height: 34px;
-    line-height: 34px;
+    height: 28px;
+    line-height: 28px;
+    margin-block: 2px;
 }
 </style>

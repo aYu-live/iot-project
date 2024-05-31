@@ -16,7 +16,7 @@
     </a-form> -->
     <a-space>
         <a-button type="primary" :disabled="!hasSelected" @click="handleOpenBtachEditModal">
-            批量更新
+            批量修改
         </a-button>
     </a-space>
     <a-table
