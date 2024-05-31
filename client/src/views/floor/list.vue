@@ -140,12 +140,12 @@ const columns = computed(() => {
         key: '40005',
     },
     {
-        title: '制热节能模式下限值',
+        title: '制热节能下限值',
         dataIndex: '40011',
         key: '40011',
     },
     {
-        title: '制冷节能模式上限值',
+        title: '制冷节能上限值',
         dataIndex: '40012',
         key: '40012',
     },

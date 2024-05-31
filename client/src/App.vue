@@ -140,4 +140,7 @@ function useInit () {
         }
     }
 }
+.ant-menu .ant-menu-item.ant-menu-item-only-child:last-child {
+    margin-bottom: 0;
+}
 </style>
