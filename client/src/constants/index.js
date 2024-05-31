@@ -6,7 +6,6 @@ export const mode01Map = {
 export const statusMap = {
     1: '开机',
     3: '关机',
-    4: '取消',
 }
 
 export const speedMap = {
