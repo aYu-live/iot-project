@@ -1,5 +1,5 @@
 # 基于官方Node镜像
-FROM node:20.12.2
+FROM hub.rat.dev/library/node:20.12.2
 
 # 设置工作目录
 WORKDIR /app
