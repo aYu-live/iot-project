@@ -11,7 +11,10 @@ export class UserController {
   async validate(@Body() body: { pwd: string; type: PwdType | PwdType[] }) {
     const user = await this.userService.validate(body);
 
-    return { code: 200, data: { passed: !!user?.id } };
+    return {
+      code: 200,
+      data: { passed: user?.id !== undefined && user?.id !== null },
+    };
   }
 
   @Put('updateNormal')
