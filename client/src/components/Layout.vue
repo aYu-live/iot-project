@@ -99,7 +99,7 @@ export default {
 .layout {
     overflow: hidden;
     height: 100vh;
-
+    font-size: 16px !important;
     :global {
         .header-wrapper {
             padding: 0;
@@ -124,5 +124,6 @@ export default {
     height: 28px;
     line-height: 28px;
     margin-block: 2px;
+    font-size: 16px !important;
 }
 </style>

@@ -17,3 +17,4 @@ export const updateDevice = async (data) => $http.put('/api/device/update', data
 
 export const validatePwd = async (data) => $http.post('/api/user/validate', data)
 export const updateNormal = async (data) => $http.put('/api/user/updateNormal', data)
+export const checkHasSuperAdmin = async () => $http.get('/api/user/checkHasSuperAdmin')

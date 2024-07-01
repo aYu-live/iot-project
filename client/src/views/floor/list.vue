@@ -17,7 +17,7 @@
     <a-table
         :dataSource="dataSource"
         :columns="columns"
-        :pagination="pagination"
+        :pagination="false"
         :row-class-name="(record) => (record.online ?  null : 'off-line')"
         :row-key="record => `${record.id}-${record.room}`"
             :row-selection="{
@@ -72,7 +72,7 @@ let socket = null
 const opts = ref([])
 const selectValue = ref([]);
 const dataSource = ref([]);
-const pagination = reactive({ total: 0, pageSize: 40 })
+const pagination = reactive({ total: 0, pageSize: 10000 })
 const route = useRoute();
 const highlightedCells = reactive({})
 const level = ref();
@@ -205,17 +205,16 @@ const connectSock = () => {
     socket = io(`http://${import.meta.env.MODE === 'production' ? '192.168.23.5': '127.0.0.1'}:3000/deviceIo`);  // 连接到WebSocket服务器
 
     socket.on('connect', () => {
-        console.log('Connected to the WebSocket server.');
+        // console.log('Connected to the WebSocket server.');
     });
 
     // Listen for 'server-message' event from the server
     socket.on('updateDevices', (message) => {
-        console.log('Message received:', message);
         addMessageTodataSource(message)
     });
 
     socket.on('disconnect', () => {
-        console.log('Disconnected from the WebSocket server.');
+        // console.log('Disconnected from the WebSocket server.');
     });
 }
 
@@ -228,9 +227,10 @@ const addMessageTodataSource = (message) => {
                     deviceId === mes.deviceId &&
                     ip === mes.ip
                 ) {
+                    const flag = item[mes.attr] !== mes.val
                     item[mes.attr] = mes.val
-                    item.online = true
-                    setHighlight(id, mes.attr)
+                    item.online = mes.online
+                    flag && setHighlight(id, mes.attr)
                 }
             })
         }
@@ -285,8 +285,8 @@ const getDisplayType = (type, { OFF }) => (value) => {
     const val = Number(value)
     
     const status01Map = {
-        0: '打开',
-        1: '闭合',
+        0: '闭合',
+        1: '打开',
     }
 
     const tempDisplay = (c) => `${c}°C`

@@ -26,22 +26,30 @@ export class UserService {
     });
   }
 
-  async updateNormal(pwd: string) {
-    const user = await this.userRepository.findOneBy({ type: 'normal' });
+  async updateNormal(pwd: string, type = 'normal') {
+    const user = await this.userRepository.findOneBy({
+      type: type || 'normal',
+    });
     if (!user?.type) {
       return this.userRepository.save({
-        type: 'normal',
+        type: type || 'normal',
         password: pwd,
-        userName: 'admin',
+        userName: type === 'normal' ? 'admin' : 'superAdmin',
       });
     }
     return this.userRepository.update(
       {
-        type: 'normal',
+        type: type || 'normal',
       },
       {
         password: pwd,
       },
     );
+  }
+
+  async findSuperAdmin() {
+    return this.userRepository.findOneBy({
+      type: 'super',
+    });
   }
 }

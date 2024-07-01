@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 
 type PwdType = 'super' | 'normal';
@@ -17,8 +17,17 @@ export class UserController {
   }
 
   @Put('updateNormal')
-  async updateNormal(@Body() body: { pwd: string }) {
-    await this.userService.updateNormal(body.pwd);
+  async updateNormal(@Body() body: { pwd: string, type }) {
+    await this.userService.updateNormal(body.pwd, body.type);
     return { code: 200, data: true };
+  }
+
+  @Get('checkHasSuperAdmin')
+  async checkHasSuperAdmin() {
+    const user = await this.userService.findSuperAdmin();
+    return {
+      code: 200,
+      data: { has: !!user },
+    };
   }
 }

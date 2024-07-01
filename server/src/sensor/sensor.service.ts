@@ -46,44 +46,68 @@ export class SensorService {
       if (!data?.length) return;
       const newData = [];
       for (const item of data) {
-        const { ip, attr, deviceId, val } = item;
+        const { ip, attr, deviceId, val, online = true } = item;
         const device = await this.deviceRepository.findOneBy({
           ip,
           deviceId,
         });
-        if (device?.id && (device[attr] !== val || !device.online)) {
+        if (device?.id && !online && device.online) {
+          await this.deviceRepository.update(device.id, {
+            online: false,
+          });
+          newData.push({
+            ...item,
+          });
+          continue;
+        } else if (
+          device?.id &&
+          online &&
+          (device[attr] !== val || !device.online)
+        ) {
           await this.deviceRepository.save({
             ...device,
             [attr]: val,
             online: true,
           });
         }
-        const sensor = await this.sensorRepository.find({
-          where: {
-            ip,
-            attr,
-            deviceId,
-          },
-          order: {
-            createAt: 'DESC',
-          },
-        });
-
-        if (sensor?.[0]?.val !== val) {
-          newData.push({
-            ...item,
+        if (online) {
+          const sensor = await this.sensorRepository.find({
+            where: {
+              ip,
+              attr,
+              deviceId,
+            },
+            order: {
+              createAt: 'DESC',
+            },
           });
+
+          if (sensor?.[0]?.val !== val || (online && !device.online)) {
+            newData.push({
+              ...item,
+              online: true,
+            });
+          }
         }
       }
       if (newData?.length) {
         this.sensorGateway.broadcastMessage('updateDevices', newData);
-        await this.sensorRepository.save(newData);
+        await this.sensorRepository.save(
+          newData
+            .filter((i) => i.online)
+            .map((i) => {
+              const { ip, attr, deviceId, val, timestamp } = i;
+              return { ip, attr, deviceId, val, timestamp };
+            }),
+        );
       }
     });
   }
 
   // 请求实时数据
-  private async requestData(ip: string): Promise<Sensor[]> {
+  private async requestData(
+    ip: string,
+  ): Promise<(Sensor & { online?: boolean })[]> {
     let data = [];
     try {
       const response = await lastValueFrom(
@@ -111,11 +135,24 @@ export class SensorService {
             attr,
             val,
             timestamp,
+            online: true,
           });
         } catch (err) {
           Logger.error('遍历数据报错' + err);
           continue;
         }
+      } else if (status === 'Error') {
+        const [ipWithSlashes, rest] = id?.split?.('-');
+        if (!ipWithSlashes) continue;
+        const ip = ipWithSlashes.replace(/\//g, '.');
+        if (!rest) continue;
+        const [deviceId, attr] = rest?.split?.('.');
+        if (!(deviceId && attr)) continue;
+        res.push({
+          ip,
+          deviceId,
+          online: false,
+        });
       }
     }
     return res;

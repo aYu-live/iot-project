@@ -4,7 +4,8 @@
         <div style="margin: 20px 100px;">
             <a-input v-model:value="pwd" placeholder="请输入密码"></a-input>
             <div style="height: 20px;"></div>
-            <a-button block type="primary" @click="handleValidate">校验密码</a-button>
+            <a-button v-if="hasSuperAdmin" block type="primary" @click="handleValidate">校验密码</a-button>
+            <a-button v-else block type="primary" @click="saveSuperAdmin">新增超级密码</a-button>
         </div>
     </template>
     <a-spin v-else :spinning="loading">
@@ -130,8 +131,12 @@ const columns = [
 
 const labelCol = { style: { width: '50px' } };
 const { init } = useMenuList()
-const { validateAdmin, updateNormalAdmin } = useAdmin()
-const { isSuperAdmin } = storeToRefs(useAdmin())
+const {
+        validateAdmin,
+        updateNormalAdmin,
+        checkHasSuperAdmin
+} = useAdmin()
+const { isSuperAdmin, hasSuperAdmin } = storeToRefs(useAdmin())
 const pwdRecord = reactive({
     visible: false,
     pwd: ''
@@ -151,6 +156,10 @@ const selectedRowKeys = ref([])
 const hasSelected = computed(() => selectedRowKeys.value.length > 0)
 const renameRecord = reactive({
     visible: false
+})
+
+onMounted(() => {
+    checkHasSuperAdmin()
 })
 
 const onChange = async () => {
@@ -312,6 +321,14 @@ const handleUpdatePwd = async () =>{
 const handleCancelPwd = () => {
     pwdRecord.visible = false;
     pwdRecord.pwd = ''
+}
+
+const saveSuperAdmin = async () => {
+    await updateNormalAdmin(pwd.value, 'super')
+    hasSuperAdmin.value = true
+    isSuperAdmin.value = true
+    getTableList({first: true})
+    getIps()
 }
 
 </script>
