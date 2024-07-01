@@ -26,7 +26,15 @@ export class UserService {
     });
   }
 
-  updateNormal(pwd: string) {
+  async updateNormal(pwd: string) {
+    const user = await this.userRepository.findOneBy({ type: 'normal' });
+    if (!user?.type) {
+      return this.userRepository.save({
+        type: 'normal',
+        password: pwd,
+        userName: 'admin',
+      });
+    }
     return this.userRepository.update(
       {
         type: 'normal',

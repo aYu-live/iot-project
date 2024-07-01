@@ -10,10 +10,9 @@ export class UserController {
   @Post('validate')
   async validate(@Body() body: { pwd: string; type: PwdType | PwdType[] }) {
     const user = await this.userService.validate(body);
-
     return {
       code: 200,
-      data: { passed: user?.id !== undefined && user?.id !== null },
+      data: { passed: !!user },
     };
   }
 
